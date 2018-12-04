@@ -1,0 +1,82 @@
+#!/usr/bin/env python3
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+import os
+import sys
+import shutil
+import logging
+import argparse
+from tempfile import NamedTemporaryFile
+
+from geotk.common import color_log
+from geotk.svg2obj import svg2obj
+
+
+
+LOG = logging.getLogger("svg2obj")
+
+
+
+def main():
+    log_geo = logging.getLogger("geo")
+    for log in LOG, log_geo:
+        log.addHandler(logging.StreamHandler())
+        color_log(log)
+
+    parser = argparse.ArgumentParser(
+        description="Convert paths in an SVG file to polygons in OBJ format.")
+    parser.add_argument(
+        "--verbose", "-v",
+        action="count", default=0,
+        help="Print verbose information for debugging.")
+    parser.add_argument(
+        "--quiet", "-q",
+        action="count", default=0,
+        help="Suppress warnings.")
+
+    parser.add_argument(
+        "svg",
+        metavar="SVG",
+        help="Path to SVG file.")
+
+    parser.add_argument(
+        "obj",
+        metavar="OBJ",
+        nargs="?",
+        help="Path to OBJ file.")
+
+    args = parser.parse_args()
+
+    level = (logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG)[
+        max(0, min(3, 1 + args.verbose - args.quiet))]
+    for log in LOG, log_geo:
+        log.setLevel(level)
+
+    def f(out):
+        with open(args.svg, "r", encoding="utf-8") as svg:
+            svg2obj(out, svg)
+
+    if args.obj:
+        with NamedTemporaryFile("w", encoding="utf=8", delete=False) as out:
+            os.fchmod(out.fileno(), os.stat(args.svg).st_mode)
+            f(out)
+        shutil.move(out.name, args.obj)
+    else:
+        f(sys.stdout)
+
+
+
+if __name__ == "__main__":
+    main()
