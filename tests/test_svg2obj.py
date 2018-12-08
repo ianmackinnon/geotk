@@ -26,8 +26,9 @@ TEST_PATH = os.path.abspath(os.path.dirname(__file__))
 
 
 
-def test_triangles_api():
-    name = "triangles"
+def test_api(svg2obj_test_name):
+    name = svg2obj_test_name
+
     svg_path = os.path.join(TEST_PATH, "cases/svg2obj/{name}.svg".format(name=name))
     obj_known_path = os.path.join(TEST_PATH, "cases/svg2obj/{name}.obj".format(name=name))
 
@@ -44,8 +45,9 @@ def test_triangles_api():
 
 
 
-def test_triangles_cli():
-    name = "triangles"
+def test_cli(svg2obj_test_name):
+    name = svg2obj_test_name
+
     svg_path = os.path.join(TEST_PATH, "cases/svg2obj/{name}.svg".format(name=name))
     obj_known_path = os.path.join(TEST_PATH, "cases/svg2obj/{name}.obj".format(name=name))
     obj_result_path = "/tmp/{name}.obj".format(name=name)
