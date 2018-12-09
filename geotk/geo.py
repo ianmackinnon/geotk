@@ -165,7 +165,7 @@ def path_to_poly_list(path):
             "path": poly_points_linear,
         },
         "Z": {
-            "length": 0
+            "length": 0,
         },
         "C": {
             "length": 6,
@@ -217,7 +217,8 @@ def path_to_poly_list(path):
                 poly_list[-1].append(cursor)
 
         if command.upper() == "Z":
-            poly_list[-1].append(poly_list[-1][0])
+            cursor = poly_list[-1][0]
+            poly_list[-1].append(cursor)
 
 
     poly_list = [[(v[0], v[1]) for v in poly] for poly in poly_list]
