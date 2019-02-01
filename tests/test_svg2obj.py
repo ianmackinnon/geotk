@@ -29,8 +29,8 @@ TEST_PATH = os.path.abspath(os.path.dirname(__file__))
 def test_api(svg2obj_test_name):
     name = svg2obj_test_name
 
-    svg_path = os.path.join(TEST_PATH, "cases/svg2obj/{name}.svg".format(name=name))
-    obj_known_path = os.path.join(TEST_PATH, "cases/svg2obj/{name}.obj".format(name=name))
+    svg_path = os.path.join(TEST_PATH, f"cases/svg2obj/{name}.svg")
+    obj_known_path = os.path.join(TEST_PATH, f"cases/svg2obj/{name}.obj")
 
     with open(obj_known_path) as fp:
         obj_known_text = fp.read()
@@ -48,9 +48,9 @@ def test_api(svg2obj_test_name):
 def test_cli(svg2obj_test_name):
     name = svg2obj_test_name
 
-    svg_path = os.path.join(TEST_PATH, "cases/svg2obj/{name}.svg".format(name=name))
-    obj_known_path = os.path.join(TEST_PATH, "cases/svg2obj/{name}.obj".format(name=name))
-    obj_result_path = "/tmp/{name}.obj".format(name=name)
+    svg_path = os.path.join(TEST_PATH, f"cases/svg2obj/{name}.svg")
+    obj_known_path = os.path.join(TEST_PATH, f"cases/svg2obj/{name}.obj")
+    obj_result_path = f"/tmp/{name}.obj"
 
     try:
         os.remove(obj_result_path)

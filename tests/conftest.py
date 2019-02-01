@@ -12,7 +12,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import sys
 import logging
 import warnings
 from collections import defaultdict
@@ -42,17 +41,15 @@ def get_case_names(test_name, required):
     for base in os.listdir(case_path):
         name, ext = base.split(".", 1)
         if ext not in allowed:
-            warnings.warn(
-                "File '%s' with unexpected extension `%s` in test case directory `%s`" % (
-                    base, ext, case_path))
+            warnings.warn(f"File '{base}' with unexpected extension `{ext}` "
+                          f"in test case directory `{case_path}`")
         name_dict[name].add(ext)
 
     name_list = []
     for name, ext_set in name_dict.items():
         if not required <= ext_set <= allowed:
-            warnings.warn(
-                "Unexpected file extensions %s for test case `%s` in directory `%s`" % (
-                    ext_set, name, case_path))
+            warnings.warn(f"Unexpected file extensions {ext_set} for test case "
+                          f"`{name}` in directory `{case_path}`")
             continue
         name_list.append(name)
     return sorted(name_list)

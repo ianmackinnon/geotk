@@ -14,6 +14,7 @@
 import logging
 
 from geotk.geo import svg2paths
+from geotk.common import format_float
 
 
 
@@ -39,9 +40,11 @@ def write_obj(out, paths):
 
     out.write("g\n")
     for vertex in vertex_list:
-        out.write("v %f %f 0\n" % (vertex[0], vertex[1]))
+        out.write(f"v {format_float(vertex[0])} {format_float(vertex[1])} 0\n")
     for face in face_list:
-        out.write("f %s\n" % " ".join(["%d" % v for v in face]))
+        out.write("f ")
+        out.write(" ".join([str(v) for v in face]))
+        out.write("\n")
     LOG.info("Wrote %d vertices and %d faces.",
              len(vertex_list), len(face_list))
 

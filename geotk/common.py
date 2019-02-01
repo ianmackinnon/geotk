@@ -38,8 +38,7 @@ def color_log(log):
     def _format(value):
         if isinstance(value, float):
             return "%0.3f"
-        else:
-            return "%s"
+        return "%s"
 
     def message_args(args):
         if not args:
@@ -72,3 +71,14 @@ def color_log(log):
 
 def clean_whitespace(text):
     return re.sub(r"[\s]+", " ", text).strip()
+
+
+
+def format_float(value):
+    if not value:
+        return "0"
+
+    if int(value) == value:
+        return f"{int(value):d}"
+
+    return str(value)

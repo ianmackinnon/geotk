@@ -14,21 +14,11 @@
 import logging
 
 from geotk.geo import svg2paths
+from geotk.common import format_float
 
 
 
 LOG = logging.getLogger("svg2gcode")
-
-
-
-def format_float(value):
-    if not value:
-        return "0"
-
-    if int(value) == value:
-        return "%d" % value
-
-    return str(value)
 
 
 
@@ -38,18 +28,18 @@ def write_gcode(out, paths, conf):
     """
 
     out.write("G90\n")
-    out.write("F%s\n" % format_float(conf["feedrate"]))
+    out.write(f"F{format_float(conf['feedrate'])}\n")
 
-    out.write("G0 Z%s\n" % format_float(conf["z-safety"]))
+    out.write(f"G0 Z{format_float(conf['z-safety'])}\n")
     for path in paths:
         if not path:
             continue
 
-        out.write("G0 X%s Y%s\n" % (format_float(path[0][0]), format_float(path[0][1])))
-        out.write("G1 Z%s\n" % format_float(conf["z-mill"]))
+        out.write(f"G0 X{format_float(path[0][0])} Y{format_float(path[0][1])}\n")
+        out.write(f"G1 Z{format_float(conf['z-mill'])}\n")
         for vertex in path[1:]:
-            out.write("G1 X%s Y%s\n" % (format_float(vertex[0]), format_float(vertex[1])))
-        out.write("G1 Z%s\n" % format_float(conf["z-safety"]))
+            out.write(f"G1 X{format_float(vertex[0])} Y{format_float(vertex[1])}\n")
+        out.write(f"G1 Z{format_float(conf['z-safety'])}\n")
 
 
 

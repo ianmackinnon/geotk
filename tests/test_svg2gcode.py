@@ -30,9 +30,9 @@ TEST_PATH = os.path.abspath(os.path.dirname(__file__))
 def test_api(svg2gcode_test_name):
     name = svg2gcode_test_name
 
-    conf_path = os.path.join(TEST_PATH, "cases/svg2gcode/{name}.conf.json".format(name=name))
-    svg_path = os.path.join(TEST_PATH, "cases/svg2gcode/{name}.svg".format(name=name))
-    gcode_known_path = os.path.join(TEST_PATH, "cases/svg2gcode/{name}.gcode".format(name=name))
+    conf_path = os.path.join(TEST_PATH, f"cases/svg2gcode/{name}.conf.json")
+    svg_path = os.path.join(TEST_PATH, f"cases/svg2gcode/{name}.svg")
+    gcode_known_path = os.path.join(TEST_PATH, f"cases/svg2gcode/{name}.gcode")
 
     with open(gcode_known_path) as fp:
         gcode_known_text = fp.read()
@@ -54,10 +54,10 @@ def test_api(svg2gcode_test_name):
 def test_cli(svg2gcode_test_name):
     name = svg2gcode_test_name
 
-    conf_path = os.path.join(TEST_PATH, "cases/svg2gcode/{name}.conf.json".format(name=name))
-    svg_path = os.path.join(TEST_PATH, "cases/svg2gcode/{name}.svg".format(name=name))
-    gcode_known_path = os.path.join(TEST_PATH, "cases/svg2gcode/{name}.gcode".format(name=name))
-    gcode_result_path = "/tmp/{name}.gcode".format(name=name)
+    conf_path = os.path.join(TEST_PATH, f"cases/svg2gcode/{name}.conf.json")
+    svg_path = os.path.join(TEST_PATH, f"cases/svg2gcode/{name}.svg")
+    gcode_known_path = os.path.join(TEST_PATH, f"cases/svg2gcode/{name}.gcode")
+    gcode_result_path = f"/tmp/{name}.gcode"
 
     try:
         os.remove(gcode_result_path)

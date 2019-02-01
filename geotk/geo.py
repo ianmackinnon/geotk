@@ -12,7 +12,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
-import sys
 import math
 import logging
 
@@ -242,7 +241,7 @@ matrix\(
 ([0-9.e-]+)
 \)""", re.X).match(text)
     if match:
-        LOG.debug("transform: %s" % match.group(0))
+        LOG.debug("transform: %s", match.group(0))
         xform = [float(v) for v in match.groups()]
         return arrmat((
             [xform[0], xform[2], xform[4]],
@@ -257,7 +256,7 @@ translate\(
 \)
 """, re.X).match(text)
     if match:
-        LOG.debug("transform: %s" % match.group(0))
+        LOG.debug("transform: %s", match.group(0))
         xform = [float(v) for v in match.groups()]
         return arrmat((
             [1, 0, xform[0]],
@@ -271,7 +270,7 @@ translate\(
 \)
 """, re.X).match(text)
     if match:
-        LOG.debug("transform: %s" % match.group(0))
+        LOG.debug("transform: %s", match.group(0))
         xform = [float(v) for v in match.groups()]
         return arrmat((
             [1, 0, xform[0]],
@@ -285,7 +284,7 @@ rotate\(
 \)
 """, re.X).match(text)
     if match:
-        LOG.debug("transform: %s" % match.group(0))
+        LOG.debug("transform: %s", match.group(0))
         xform = [float(v) for v in match.groups()]
         theta = math.radians(xform[0])
         matrix = arrmat((
@@ -293,7 +292,7 @@ rotate\(
             [math.sin(theta), math.cos(theta), 0],
             [0, 0, 1]
         ))
-        LOG.debug("matrix: %s" % matrix)
+        LOG.debug("matrix: %s", matrix)
         return matrix
 
     match = re.compile(r"""
@@ -304,7 +303,7 @@ rotate\(
 \)
 """, re.X).match(text)
     if match:
-        LOG.debug("transform: %s" % match.group(0))
+        LOG.debug("transform: %s", match.group(0))
         xform = [float(v) for v in match.groups()]
         theta = math.radians(xform[0])
         matrix = arrmat((
@@ -320,7 +319,7 @@ rotate\(
             [0, 1, -xform[2]],
             [0, 0, 1]
         ))
-        LOG.debug("matrix: %s" % matrix)
+        LOG.debug("matrix: %s", matrix)
         return matrix
 
     match = re.compile(r"""
@@ -330,7 +329,7 @@ scale\(
 \)
 """, re.X).match(text)
     if match:
-        LOG.debug("transform: %s" % match.group(0))
+        LOG.debug("transform: %s", match.group(0))
         xform = [float(v) for v in match.groups()]
         return arrmat((
             [xform[0], 0, 0],
@@ -344,7 +343,7 @@ scale\(
 \)
 """, re.X).match(text)
     if match:
-        LOG.debug("transform: %s" % match.group(0))
+        LOG.debug("transform: %s", match.group(0))
         xform = [float(v) for v in match.groups()]
         return arrmat((
             [xform[0], 0, 0],

@@ -15,7 +15,7 @@ import re
 import logging
 from collections import defaultdict
 
-from geotk.common import clean_whitespace
+from geotk.common import clean_whitespace, format_float
 
 
 
@@ -27,36 +27,45 @@ Z_WARN_NON_ZERO = False
 
 
 def write_svg(out, face_list, vert_list, width, height, unit):
-    out.write('''<svg
+    width = format_float(width)
+    height = format_float(height)
+
+    out.write(f"""\
+<svg
   xmlns:svg="http://www.w3.org/2000/svg"
   xmlns="http://www.w3.org/2000/svg"
-  width="%f%s"
-  height="%f%s"
-  viewBox="%f %f %f %f"
+  width="{width}{unit}"
+  height="{height}{unit}"
+  viewBox="0 0 {width} {height}"
 >
-''' % (width, unit, height, unit, 0, 0, width, height))
+""")
 
     if unit:
-        out.write('''<sodipodi:namedview
-     inkscape:document-units="%s"
-     units="%s"
-/>
-''' % (unit, unit))
+        out.write(f"""\
+  <sodipodi:namedview
+    inkscape:document-units="{unit}"
+    units="{unit}"
+  />
+""")
 
+    path_style = ("fill:none;stroke:#000000;stroke-width:0.1;"
+                  "stroke-miterlimit:4;stroke-dasharray:none")
 
     for face in face_list:
-        out.write('  <path style="fill:none;stroke:#000000;stroke-width:0.1;stroke-miterlimit:4;stroke-dasharray:none" d=\"')
+        path = ""
         for i, v in enumerate(face):
             vert = vert_list[v - 1]
-            out.write(" %s%f %f" % (
-                "M" if i == 0 else "L",
-                vert[0],
-                vert[1],
-            ))
-        out.write(' Z"/>\n')
-    out.write('</svg>')
+            command = "M" if i == 0 else "L"
+            path += f" {command}{format_float(vert[0])} {format_float(vert[1])}"
+        path += " Z"
+        out.write(f"""\
+  <path style="{path_style}" d="{path}"/>
+""")
+    out.write("""\
+</svg>
+""")
 
-    LOG.info("%s faces.", len(face_list))
+    LOG.info(f"%d faces.", len(face_list))
 
 
 
