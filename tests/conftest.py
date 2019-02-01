@@ -13,6 +13,7 @@
 
 import os
 import sys
+import logging
 import warnings
 from collections import defaultdict
 
@@ -22,34 +23,36 @@ TEST_PATH = os.path.abspath(os.path.dirname(__file__))
 
 
 
+LOG = logging.getLogger("conftest")
+
+
+
 class GenerateError(Exception):
     pass
 
 
 
-def blah():
-    return 5
-
-
-
-def get_case_names(test_name, src_ext, dst_ext):
+def get_case_names(test_name, required):
     case_path = os.path.join(TEST_PATH, "cases", test_name)
     name_dict = defaultdict(set)
+
+    required = set(required)
+    allowed = required
+
     for base in os.listdir(case_path):
         name, ext = base.split(".", 1)
-        print(name, ext)
-        if ext not in {src_ext, dst_ext}:
+        if ext not in allowed:
             warnings.warn(
-                "File '%s' with unexpected extension '%s' in test case directory '%s'" % (
+                "File '%s' with unexpected extension `%s` in test case directory `%s`" % (
                     base, ext, case_path))
         name_dict[name].add(ext)
 
     name_list = []
     for name, ext_set in name_dict.items():
-        if len(ext_set) != 2:
+        if not required <= ext_set <= allowed:
             warnings.warn(
-                "Ignoring solitary file '%s.%s' in test case directory '%s'" % (
-                    name, ext_set.pop(), case_path))
+                "Unexpected file extensions %s for test case `%s` in directory `%s`" % (
+                    ext_set, name, case_path))
             continue
         name_list.append(name)
     return sorted(name_list)
@@ -57,9 +60,12 @@ def get_case_names(test_name, src_ext, dst_ext):
 
 
 def pytest_generate_tests(metafunc):
+    if "svg2gcode_test_name" in metafunc.fixturenames:
+        name_list = get_case_names("svg2gcode", ("conf.json", "svg", "gcode"))
+        metafunc.parametrize("svg2gcode_test_name", name_list)
     if "svg2obj_test_name" in metafunc.fixturenames:
-        name_list = get_case_names("svg2obj", "svg", "obj")
+        name_list = get_case_names("svg2obj", ("svg", "obj"))
         metafunc.parametrize("svg2obj_test_name", name_list)
     if "obj2svg_test_name" in metafunc.fixturenames:
-        name_list = get_case_names("obj2svg", "obj", "svg")
+        name_list = get_case_names("obj2svg", ("obj", "svg"))
         metafunc.parametrize("obj2svg_test_name", ["cone"])

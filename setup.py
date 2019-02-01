@@ -38,7 +38,7 @@ setuptools.setup(
     ],
     install_requires=["numpy", "beautifulsoup4", "lxml"],
     python_requires='>=3',
-    scripts=["scripts/obj2svg", "scripts/svg2obj", ],
+    scripts=["scripts/obj2svg", "scripts/svg2obj", "scripts/svg2gcode", ],
     setup_requires=["pytest-runner"],
     tests_requires=["pytest", "tox", "coverage", "pytest-cov"],
 )

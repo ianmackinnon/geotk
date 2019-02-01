@@ -14,7 +14,6 @@ OBJ polygon faces are converted to closed paths, compressed in the Z-axis.
 
     ./obj2svg.py in.obj > out.svg
     ./obj2svg.py in.obj out.svg
-    
 
 
 ## `svg2obj`
@@ -33,3 +32,31 @@ SVG paths are converted to OBJ polygon faces parallel to the Z-plane at the spec
     
     ./svg2obj.py in.svg > out.obj
     ./svg2obj.py in.svg out.obj
+
+
+## `svg2gcode`
+
+Convert paths in an SVG file to G-code for a Grbl-compatible CNC router.
+
+SVG paths are converted to linear movements parallel to the Z-plane at the specified distance. Bézier curves are sampled at intervals.
+
+A JSON configuration file in the following format is also required:
+
+```
+{
+  "z-safety": <Z safety height in mm>,
+  "z-mill": <maxiumum distance to mill, eg. the depth of the wasteboard, in mm>,
+  "feedrate": <milling feedrate in mm/s>
+}
+```
+
+
+## Caveats:
+
+-   Only supports path commands `MmLlHhVvCcZz`.
+
+
+## Usage:
+    
+    ./svg2gcode.py conf.json in.svg > out.gcode
+    ./svg2gcode.py conf.json in.svg out.gcode
