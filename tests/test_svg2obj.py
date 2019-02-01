@@ -14,11 +14,14 @@
 import os
 import io
 import sys
+from pathlib import Path
 from subprocess import Popen, PIPE
 
 sys.path.append("../")
 
 from geotk.svg2obj import svg2obj
+
+from conftest import get_test_case
 
 
 
@@ -26,11 +29,9 @@ TEST_PATH = os.path.abspath(os.path.dirname(__file__))
 
 
 
-def test_api(svg2obj_test_name):
-    name = svg2obj_test_name
-
-    svg_path = os.path.join(TEST_PATH, f"cases/svg2obj/{name}.svg")
-    obj_known_path = os.path.join(TEST_PATH, f"cases/svg2obj/{name}.obj")
+def test_api(svg2obj_case_name):
+    (svg_path, obj_known_path) = get_test_case(
+        "svg2obj", svg2obj_case_name)
 
     with open(obj_known_path) as fp:
         obj_known_text = fp.read()
@@ -45,12 +46,11 @@ def test_api(svg2obj_test_name):
 
 
 
-def test_cli(svg2obj_test_name):
-    name = svg2obj_test_name
+def test_cli(svg2obj_case_name):
+    (svg_path, obj_known_path) = get_test_case(
+        "svg2obj", svg2obj_case_name)
 
-    svg_path = os.path.join(TEST_PATH, f"cases/svg2obj/{name}.svg")
-    obj_known_path = os.path.join(TEST_PATH, f"cases/svg2obj/{name}.obj")
-    obj_result_path = f"/tmp/{name}.obj"
+    obj_result_path = f"/tmp/{svg2obj_case_name}.obj"
 
     try:
         os.remove(obj_result_path)

@@ -15,24 +15,24 @@ import os
 import io
 import sys
 import json
+from pathlib import Path
 from subprocess import Popen, PIPE
 
 sys.path.append("../")
 
 from geotk.svg2gcode import svg2gcode
 
-
-
-TEST_PATH = os.path.abspath(os.path.dirname(__file__))
+from conftest import get_test_case
 
 
 
-def test_api(svg2gcode_test_name):
-    name = svg2gcode_test_name
+TEST_PATH = Path(__file__).parent.resolve()
 
-    conf_path = os.path.join(TEST_PATH, f"cases/svg2gcode/{name}.conf.json")
-    svg_path = os.path.join(TEST_PATH, f"cases/svg2gcode/{name}.svg")
-    gcode_known_path = os.path.join(TEST_PATH, f"cases/svg2gcode/{name}.gcode")
+
+
+def test_api(svg2gcode_case_name):
+    (conf_path, svg_path, gcode_known_path) = get_test_case(
+        "svg2gcode", svg2gcode_case_name)
 
     with open(gcode_known_path) as fp:
         gcode_known_text = fp.read()
@@ -51,13 +51,10 @@ def test_api(svg2gcode_test_name):
 
 
 
-def test_cli(svg2gcode_test_name):
-    name = svg2gcode_test_name
-
-    conf_path = os.path.join(TEST_PATH, f"cases/svg2gcode/{name}.conf.json")
-    svg_path = os.path.join(TEST_PATH, f"cases/svg2gcode/{name}.svg")
-    gcode_known_path = os.path.join(TEST_PATH, f"cases/svg2gcode/{name}.gcode")
-    gcode_result_path = f"/tmp/{name}.gcode"
+def test_cli(svg2gcode_case_name):
+    (conf_path, svg_path, gcode_known_path) = get_test_case(
+        "svg2gcode", svg2gcode_case_name)
+    gcode_result_path = f"/tmp/{svg2gcode_case_name}.gcode"
 
     try:
         os.remove(gcode_result_path)

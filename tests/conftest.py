@@ -11,15 +11,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
 import logging
 import warnings
-from collections import defaultdict
+from pathlib import Path
+from collections import defaultdict, namedtuple
 
 
 
-TEST_PATH = os.path.abspath(os.path.dirname(__file__))
+TEST_PATH = Path(__file__).parent.resolve()
 
+TEST_CASE_PATTERNS = {
+    "svg2gcode": ("conf_json", "svg", "gcode"),
+    "svg2obj": ("svg", "obj"),
+    "obj2svg": ("obj", "svg"),
+}
 
 
 LOG = logging.getLogger("conftest")
@@ -31,38 +36,56 @@ class GenerateError(Exception):
 
 
 
-def get_case_names(test_name, required):
-    case_path = os.path.join(TEST_PATH, "cases", test_name)
+def get_case_names(func_name, suffix_list):
+    """
+    Get file stems for test cases.
+    Raise a warning if only some of the files for a test case are present,
+    or if an unexpected file with the same name is found.
+    """
+
+    case_path = TEST_PATH / "cases" / func_name
     name_dict = defaultdict(set)
 
-    required = set(required)
-    allowed = required
+    suffix_required = {v.replace("_", ".") for v in suffix_list}
 
-    for base in os.listdir(case_path):
-        name, ext = base.split(".", 1)
-        if ext not in allowed:
-            warnings.warn(f"File '{base}' with unexpected extension `{ext}` "
-                          f"in test case directory `{case_path}`")
-        name_dict[name].add(ext)
+    for base in case_path.iterdir():
+        # Split on first dot, rather than splitting
+        # before last dot like pathlib.
+        (stem, suffix) = str(base).split(".", 1)
+        if suffix not in suffix_required:
+            warnings.warn(
+                f"File '{base}' with unexpected suffix `{base.suffix}` "
+                f"in test case directory `{case_path}`")
+        name_dict[stem].add(suffix)
 
     name_list = []
-    for name, ext_set in name_dict.items():
-        if not required <= ext_set <= allowed:
-            warnings.warn(f"Unexpected file extensions {ext_set} for test case "
-                          f"`{name}` in directory `{case_path}`")
+    for stem, suffix_set in name_dict.items():
+        if suffix_set != suffix_required:
+            warnings.warn(f"Unexpected suffix in file suffixes {suffix_set} "
+                          f"for test case `{stem}` in directory `{case_path}`")
             continue
-        name_list.append(name)
-    return sorted(name_list)
+        name_list.append(stem)
+
+    return [Path(name).name for name in sorted(name_list)]
+
+
+
+def get_test_case(func_name, case_name):
+    """
+    Return a named tuple of paths for test case files.
+    """
+
+    case_path = TEST_PATH / "cases" / func_name
+    suffix_list = TEST_CASE_PATTERNS[func_name]
+    return namedtuple(f"{func_name}Case", suffix_list)(
+        *[case_path / f"{case_name}.{v.replace('_', '.')}"
+          for v in suffix_list])
 
 
 
 def pytest_generate_tests(metafunc):
-    if "svg2gcode_test_name" in metafunc.fixturenames:
-        name_list = get_case_names("svg2gcode", ("conf.json", "svg", "gcode"))
-        metafunc.parametrize("svg2gcode_test_name", name_list)
-    if "svg2obj_test_name" in metafunc.fixturenames:
-        name_list = get_case_names("svg2obj", ("svg", "obj"))
-        metafunc.parametrize("svg2obj_test_name", name_list)
-    if "obj2svg_test_name" in metafunc.fixturenames:
-        name_list = get_case_names("obj2svg", ("obj", "svg"))
-        metafunc.parametrize("obj2svg_test_name", ["cone"])
+    for func_name, suffix_list in TEST_CASE_PATTERNS.items():
+        fixture_name = f"{func_name}_case_name"
+        if fixture_name in metafunc.fixturenames:
+            metafunc.parametrize(
+                fixture_name, get_case_names(func_name, suffix_list))

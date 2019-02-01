@@ -11,14 +11,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
+from pathlib import Path
+
 import setuptools
 
-path = os.path.abspath(os.path.dirname(__file__))
-exec(open(os.path.join(path, 'geotk/version.py')).read())
+TEST_PATH = Path(__file__).parent.resolve()
 
-with open("README.md", "r") as fp:
-    long_description = fp.read()
+exec((TEST_PATH / "geotk" / "version.py").read_text())
+
 
 setuptools.setup(
     name = "geotk",
@@ -26,7 +26,7 @@ setuptools.setup(
     author="Ian Mackinnon",
     author_email="imackinnon@gmail.com",
     description="Conversion tools for 2D file formats",
-    long_description=long_description,
+    long_description=(TEST_PATH / "README.md").read_text(),
     long_description_content_type="text/markdown",
     url="https://github.com/ianmackinnon/geotk",
     keywords='geometry obj csv convert',
@@ -40,5 +40,5 @@ setuptools.setup(
     python_requires='>=3',
     scripts=["scripts/obj2svg", "scripts/svg2obj", "scripts/svg2gcode", ],
     setup_requires=["pytest-runner"],
-    tests_requires=["pytest", "tox", "coverage", "pytest-cov"],
+    tests_require=["pytest", "tox", "coverage", "pytest-cov"],
 )
