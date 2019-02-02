@@ -21,9 +21,11 @@ from collections import defaultdict, namedtuple
 TEST_PATH = Path(__file__).parent.resolve()
 
 TEST_CASE_PATTERNS = {
-    "svg2gcode": ("conf_json", "svg", "gcode"),
+    "svg2gcode": ("conf.json", "svg", "gcode"),
     "svg2obj": ("svg", "obj"),
     "obj2svg": ("obj", "svg"),
+    "svg2kicad": ("svg", "src.kicad_pcb", "dst.kicad_pcb"),
+    "kicad2svg": ("kicad_pcb", "svg"),
 }
 
 
@@ -46,7 +48,7 @@ def get_case_names(func_name, suffix_list):
     case_path = TEST_PATH / "cases" / func_name
     name_dict = defaultdict(set)
 
-    suffix_required = {v.replace("_", ".") for v in suffix_list}
+    suffix_required = set(suffix_list)
 
     for base in case_path.iterdir():
         # Split on first dot, rather than splitting
@@ -77,9 +79,9 @@ def get_test_case(func_name, case_name):
 
     case_path = TEST_PATH / "cases" / func_name
     suffix_list = TEST_CASE_PATTERNS[func_name]
-    return namedtuple(f"{func_name}Case", suffix_list)(
-        *[case_path / f"{case_name}.{v.replace('_', '.')}"
-          for v in suffix_list])
+    properties = [v.replace(".", "_") for v in suffix_list]
+    values = [case_path / f"{case_name}.{v}" for v in suffix_list]
+    return namedtuple(f"{func_name}Case", properties)(*values)
 
 
 

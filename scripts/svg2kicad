@@ -1,0 +1,110 @@
+#!/usr/bin/env python3
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+import os
+import sys
+import shutil
+import logging
+import argparse
+from tempfile import NamedTemporaryFile
+
+from geotk.common import color_log
+from geotk.svg2kicad import svg2kicad
+
+
+
+LOG = logging.getLogger("svg2kicad")
+
+
+
+def main():
+    log_geo = logging.getLogger("geo")
+    for log in LOG, log_geo:
+        log.addHandler(logging.StreamHandler())
+        color_log(log)
+
+    parser = argparse.ArgumentParser(
+        description=("Replace a net's traces in a KiCad PCB file with "
+                     "paths from an SVG."))
+
+    parser.add_argument(
+        "--verbose", "-v",
+        action="count", default=0,
+        help="Print verbose information for debugging.")
+    parser.add_argument(
+        "--quiet", "-q",
+        action="count", default=0,
+        help="Suppress warnings.")
+
+    parser.add_argument(
+        "--net", "-n",
+        action="store",
+        type=int,
+        help="Net number.")
+
+    parser.add_argument(
+        "--layer", "-l",
+        action="store",
+        help="Layer name.")
+
+    parser.add_argument(
+        "--in-place", "-i",
+        action="store_true",
+        help="Modify original file in place.")
+
+    parser.add_argument(
+        "svg",
+        metavar="SVG",
+        help="Path to SVG file.")
+
+    parser.add_argument(
+        "kicad_src",
+        metavar="KICAD_SRC",
+        help="Path to original KiCad PCB file.")
+
+    parser.add_argument(
+        "kicad_dst",
+        metavar="KICAD_DST",
+        nargs="?",
+        help="Path to destination original KiCad PCB.")
+
+    args = parser.parse_args()
+
+    level = (logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG)[
+        max(0, min(3, 1 + args.verbose - args.quiet))]
+    for log in LOG, log_geo:
+        log.setLevel(level)
+
+    def f(out):
+        with open(args.svg, "r", encoding="utf-8") as svg, \
+             open(args.kicad_src, "r", encoding="utf-8") as kicad_src:
+            svg2kicad(out, svg, kicad_src, layer=args.layer, net=args.net)
+
+    if args.kicad_dst and args.in_place:
+        raise ValueError("In place and destination file arguments "
+                         "are mutually exclusive.")
+
+    if args.kicad_dst or args.in_place:
+        with NamedTemporaryFile("w", encoding="utf=8", delete=False) as out:
+            os.fchmod(out.fileno(), os.stat(args.svg).st_mode)
+            f(out)
+        shutil.move(out.name, args.kicad_dst or args.in_place)
+    else:
+        f(sys.stdout)
+
+
+
+if __name__ == "__main__":
+    main()

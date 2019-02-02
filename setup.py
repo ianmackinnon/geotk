@@ -21,7 +21,7 @@ exec((TEST_PATH / "geotk" / "version.py").read_text())
 
 
 setuptools.setup(
-    name = "geotk",
+    name="geotk",
     version=__version__,
     author="Ian Mackinnon",
     author_email="imackinnon@gmail.com",
@@ -38,7 +38,9 @@ setuptools.setup(
     ],
     install_requires=["numpy", "beautifulsoup4", "lxml"],
     python_requires='>=3',
-    scripts=["scripts/obj2svg", "scripts/svg2obj", "scripts/svg2gcode", ],
+    scripts=["scripts/obj2svg", "scripts/svg2obj",
+             "scripts/svg2gcode",
+             "scripts/kicad2svg", "scripts/svg2kicad", ],
     setup_requires=["pytest-runner"],
     tests_require=["pytest", "tox", "coverage", "pytest-cov"],
 )

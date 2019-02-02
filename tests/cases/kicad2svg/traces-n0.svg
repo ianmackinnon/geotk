@@ -1,0 +1,32 @@
+<svg
+  xmlns:svg="http://www.w3.org/2000/svg"
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+  xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+  width="297mm"
+  height="210mm"
+  viewBox="0 0 297 210"
+>
+  <sodipodi:namedview
+    inkscape:document-units="mm"
+    units="mm"
+  />
+
+  <g
+     inkscape:label="F.Cu"
+     inkscape:groupmode="layer"
+     id="layer0"
+     style="display:inline"
+     >
+    <path style="fill:none;stroke:#000000;stroke-width:0.1;stroke-miterlimit:4;stroke-dasharray:none" d="M 25.4 25.4 L 25.4 50.8 L 50.8 25.4"/>
+  </g>
+
+  <g
+     inkscape:label="B.Cu"
+     inkscape:groupmode="layer"
+     id="layer1"
+     style="display:inline"
+     >
+    <path style="fill:none;stroke:#000000;stroke-width:0.1;stroke-miterlimit:4;stroke-dasharray:none" d="M 76.2 25.4 L 76.2 50.8 L 101.6 25.4"/>
+  </g>
+</svg>

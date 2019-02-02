@@ -109,7 +109,9 @@ def poly_points_bezier(_command, cursor, segment, absolute):
     d = abs(d1) + abs(d2)
 
     vertex_list = []
+
     n = 1 + int(10 * d) +  int(length / 100)
+    n //= 5
     for i in range(n):
         t = float(i + 1) / n
         x = point(p[0][0], p[1][0], p[2][0], p[3][0], t)
@@ -407,7 +409,7 @@ def extract_paths(node, xform=None, depth=None):
 
 
 
-def svg2paths(svg_file):
+def svg2paths(svg_file, invert_y=True):
     LOG.info("Converting %s", svg_file.name)
 
     svg_text = svg_file.read()
@@ -434,11 +436,18 @@ def svg2paths(svg_file):
         LOG.info("View box: %0.3f %0.3f %0.3f %0.3f", *viewbox)
         LOG.info("Unit scale: %0.3f, %0.3f", *unit_scale)
 
-        xform = np.array([
-            [unit_scale[0], 0, 0],
-            [0, -unit_scale[1], height],
-            [0, 0, 1]
-        ])
+        if invert_y:
+            xform = np.array([
+                [unit_scale[0], 0, 0],
+                [0, -unit_scale[1], height],
+                [0, 0, 1]
+            ])
+        else:
+            xform = np.array([
+                [unit_scale[0], 0, 0],
+                [0, unit_scale[1], 0],
+                [0, 0, 1]
+            ])
 
     paths = extract_paths(svg, xform)
 

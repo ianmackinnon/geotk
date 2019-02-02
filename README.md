@@ -60,3 +60,24 @@ A JSON configuration file in the following format is also required:
     
     ./svg2gcode.py conf.json in.svg > out.gcode
     ./svg2gcode.py conf.json in.svg out.gcode
+
+
+## `svg2kicad`
+
+Replace a net's traces in a KiCad PCB file with paths from an SVG.
+
+## Caveats:
+
+-   Only supports path commands `MmLlHhVvCcZz`.
+
+
+## `kicad2svg`
+
+Extract traces from a KiCad PCB file as SVG paths.
+
+
+## Caveats:
+
+-   Does not read page size from KiCad file; always exports an A4 SVG.
+
+
