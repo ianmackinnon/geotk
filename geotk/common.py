@@ -69,7 +69,7 @@ def color_log(log):
 
 
 
-def clean_whitespace(text):
+def format_whitespace(text):
     return re.sub(r"[\s]+", " ", text).strip()
 
 

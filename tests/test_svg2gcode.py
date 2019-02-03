@@ -54,7 +54,7 @@ def test_api(svg2gcode_case_name):
 def test_cli(svg2gcode_case_name):
     (conf_path, svg_path, gcode_known_path) = get_test_case(
         "svg2gcode", svg2gcode_case_name)
-    gcode_result_path = f"/tmp/{svg2gcode_case_name}.gcode"
+    gcode_result_path = f"/tmp/geotk-test-svg2gcode-{svg2gcode_case_name}.gcode"
 
     try:
         os.remove(gcode_result_path)

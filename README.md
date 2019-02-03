@@ -25,7 +25,9 @@ SVG paths are converted to OBJ polygon faces parallel to the Z-plane at the spec
 
 ## Caveats:
 
--   Only supports path commands `MmLlHhVvCcZz`.
+-   Geometric shapes like circles and rectangles are not converted to paths.
+-   Only supports path commands `MmLlHhVvCcAaZz`.
+-   Arcs with different X and Y radii are simplied as straight lines.
 
 
 ## Usage:
@@ -53,7 +55,9 @@ A JSON configuration file in the following format is also required:
 
 ## Caveats:
 
--   Only supports path commands `MmLlHhVvCcZz`.
+-   Geometric shapes like circles and rectangles are not converted to paths.
+-   Only supports path commands `MmLlHhVvCcAaZz`.
+-   Arcs with different X and Y radii are simplied as straight lines.
 
 
 ## Usage:
@@ -78,9 +82,14 @@ Each PCB layer is represented as a layer, and each net is represented as a subla
 
 Replace a net's traces in a KiCad PCB file with paths from an SVG.
 
+Paths must be stored exactly two layers deep. The first layer should have a name that matches the target PCB layer and the sublayer should have a name that matches the target net number of the path.
+
+
 ## Caveats:
 
--   Only supports path commands `MmLlHhVvCcZz`.
+-   Geometric shapes like circles and rectangles are not converted to paths.
+-   Only supports path commands `MmLlHhVvCcAaZz`.
+-   Arcs with different X and Y radii are simplied as straight lines.
 
 
 

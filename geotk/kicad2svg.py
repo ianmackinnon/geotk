@@ -16,7 +16,7 @@ import logging
 from collections import defaultdict
 
 from geotk.svg import header as svg_header, footer as svg_footer, \
-    linear_path_d
+    style, linear_path_d
 
 
 
@@ -32,8 +32,11 @@ REGEX = {
 def write_svg(out, layer_net_path, width, height, unit):
     out.write(svg_header(width, height, unit))
 
-    path_style = ("fill:none;stroke:#000000;stroke-width:0.1;"
-                  "stroke-miterlimit:4;stroke-dasharray:none")
+    path_style = style({
+        "fill": "none",
+        "stroke": "#000000",
+        "stroke-width": "0.1",
+    })
 
     for l, (layer_name, net_dict) in enumerate(layer_net_path.items()):
         out.write("\n")

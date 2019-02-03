@@ -100,7 +100,8 @@ def main():
         with NamedTemporaryFile("w", encoding="utf=8", delete=False) as out:
             os.fchmod(out.fileno(), os.stat(args.svg).st_mode)
             f(out)
-        shutil.move(out.name, args.kicad_dst or args.in_place)
+        dst = args.kicad_src if args.in_place else args.kicad_dst
+        shutil.move(out.name, dst)
     else:
         f(sys.stdout)
 

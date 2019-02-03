@@ -24,7 +24,7 @@
         id="layer-0-0"
         style="display:inline"
         >
-      <path style="fill:none;stroke:#000000;stroke-width:0.1;stroke-miterlimit:4;stroke-dasharray:none" d="M 25.4 25.4 L 25.4 50.8 L 50.8 25.4"/>
+      <path style="fill: none; stroke: #000000; stroke-width: 0.1;" d="M 25.4 25.4 L 25.4 50.8 L 50.8 25.4"/>
     </g>
   </g>
 
@@ -40,7 +40,7 @@
         id="layer-1-0"
         style="display:inline"
         >
-      <path style="fill:none;stroke:#000000;stroke-width:0.1;stroke-miterlimit:4;stroke-dasharray:none" d="M 76.2 25.4 L 76.2 50.8 L 101.6 25.4"/>
+      <path style="fill: none; stroke: #000000; stroke-width: 0.1;" d="M 76.2 25.4 L 76.2 50.8 L 101.6 25.4"/>
     </g>
   </g>
 </svg>

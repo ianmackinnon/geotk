@@ -13,8 +13,8 @@
 
 import logging
 
-from geotk.geo import svg2paths
 from geotk.common import format_float
+from geotk.svg import svg2paths
 
 
 

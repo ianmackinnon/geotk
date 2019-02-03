@@ -50,7 +50,7 @@ def test_cli(svg2obj_case_name):
     (svg_path, obj_known_path) = get_test_case(
         "svg2obj", svg2obj_case_name)
 
-    obj_result_path = f"/tmp/{svg2obj_case_name}.obj"
+    obj_result_path = f"/tmp/geotk-test-svg2obj-{svg2obj_case_name}.obj"
 
     try:
         os.remove(obj_result_path)

@@ -16,7 +16,7 @@ import logging
 from collections import defaultdict
 
 from geotk.svg import header as svg_header, footer as svg_footer, \
-    linear_path_d
+    style, linear_path_d
 from geotk.common import format_float
 
 
@@ -34,8 +34,11 @@ def write_svg(out, face_list, vert_list, width, height, unit):
 
     out.write(svg_header(width, height, unit))
 
-    path_style = ("fill:none;stroke:#000000;stroke-width:0.1;"
-                  "stroke-miterlimit:4;stroke-dasharray:none")
+    path_style = style({
+        "fill": "none",
+        "stroke": "#000000",
+        "stroke-width": "0.1",
+    })
 
     for face in face_list:
         path = [vert_list[v - 1] for v in face]

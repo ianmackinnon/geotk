@@ -49,7 +49,7 @@ def test_api(svg2kicad_case_name):
 def test_cli(svg2kicad_case_name):
     (svg_path, kicad_src_path, kicad_known_path) = get_test_case(
         "svg2kicad", svg2kicad_case_name)
-    kicad_result_path = f"/tmp/{svg2kicad_case_name}.kicad_pcb"
+    kicad_result_path = f"/tmp/geotk-test-svg2kicad-{svg2kicad_case_name}.kicad_pcb"
 
     try:
         os.remove(kicad_result_path)
