@@ -21,11 +21,23 @@ from collections import defaultdict, namedtuple
 TEST_PATH = Path(__file__).parent.resolve()
 
 TEST_CASE_PATTERNS = {
-    "svg2gcode": ("conf.json", "svg", "gcode"),
-    "svg2obj": ("svg", "obj"),
-    "obj2svg": ("obj", "svg"),
-    "svg2kicad": ("svg", "src.kicad_pcb", "dst.kicad_pcb"),
-    "kicad2svg": ("kicad_pcb", "svg"),
+    "svg2gcode": {
+        "required": ("conf.json", "svg", "gcode"),
+    },
+    "svg2obj": {
+        "required": ("svg", "obj"),
+    },
+    "obj2svg": {
+        "required": ("obj", "svg"),
+    },
+    "svg2kicad": {
+        "required": ("svg", "src.kicad_pcb", "dst.kicad_pcb"),
+        "remove": ("pro", ),
+    },
+    "kicad2svg": {
+        "required": ("kicad_pcb", "svg"),
+        "remove": ("pro", ),
+    },
 }
 
 
@@ -38,7 +50,7 @@ class GenerateError(Exception):
 
 
 
-def get_case_names(func_name, suffix_list):
+def get_case_names(func_name, case):
     """
     Get file stems for test cases.
     Raise a warning if only some of the files for a test case are present,
@@ -48,13 +60,19 @@ def get_case_names(func_name, suffix_list):
     case_path = TEST_PATH / "cases" / func_name
     name_dict = defaultdict(set)
 
-    suffix_required = set(suffix_list)
+    suffix_required = set(case["required"])
+
+    if case.get("remove", None):
+        for base in case_path.iterdir():
+            (stem, suffix) = str(base).split(".", 1)
+            if suffix in case["remove"]:
+                base.unlink()
 
     for base in case_path.iterdir():
         # Split on first dot, rather than splitting
         # before last dot like pathlib.
         (stem, suffix) = str(base).split(".", 1)
-        if suffix not in suffix_required:
+        if suffix not in case["required"]:
             warnings.warn(
                 f"File '{base}' with unexpected suffix `{base.suffix}` "
                 f"in test case directory `{case_path}`")
@@ -78,7 +96,7 @@ def get_test_case(func_name, case_name):
     """
 
     case_path = TEST_PATH / "cases" / func_name
-    suffix_list = TEST_CASE_PATTERNS[func_name]
+    suffix_list = TEST_CASE_PATTERNS[func_name]["required"]
     properties = [v.replace(".", "_") for v in suffix_list]
     values = [case_path / f"{case_name}.{v}" for v in suffix_list]
     return namedtuple(f"{func_name}Case", properties)(*values)
@@ -86,8 +104,8 @@ def get_test_case(func_name, case_name):
 
 
 def pytest_generate_tests(metafunc):
-    for func_name, suffix_list in TEST_CASE_PATTERNS.items():
+    for func_name, case in TEST_CASE_PATTERNS.items():
         fixture_name = f"{func_name}_case_name"
         if fixture_name in metafunc.fixturenames:
             metafunc.parametrize(
-                fixture_name, get_case_names(func_name, suffix_list))
+                fixture_name, get_case_names(func_name, case))

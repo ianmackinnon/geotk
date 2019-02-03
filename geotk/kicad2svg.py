@@ -36,22 +36,37 @@ def write_svg(out, layer_net_path, width, height, unit):
                   "stroke-miterlimit:4;stroke-dasharray:none")
 
     for l, (layer_name, net_dict) in enumerate(layer_net_path.items()):
-        out.write(f"""
+        out.write("\n")
+        out.write(f"""\
   <g
-     inkscape:label="{layer_name}"
-     inkscape:groupmode="layer"
-     id="layer{l}"
-     style="display:inline"
-     >
+      inkscape:label="{layer_name}"
+      inkscape:groupmode="layer"
+      id="layer-{l}"
+      style="display:inline"
+      >
 """)
-        for path_list in net_dict.values():
+        for n, (net, path_list) in enumerate(net_dict.items()):
+            if n:
+                out.write("\n")
+
+            out.write(f"""\
+    <g
+        inkscape:label="{net:d}"
+        inkscape:groupmode="layer"
+        id="layer-{l}-{n}"
+        style="display:inline"
+        >
+""")
             for path in path_list:
                 d = linear_path_d(path)
                 if d:
                     out.write(f"""\
-    <path style="{path_style}" d="{d}"/>
+      <path style="{path_style}" d="{d}"/>
 """)
 
+            out.write(f"""\
+    </g>
+""")
         out.write(f"""\
   </g>
 """)

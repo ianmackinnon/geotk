@@ -21,18 +21,18 @@ def header(width, height, unit):
 
     out = f"""\
 <svg
-  xmlns:svg="http://www.w3.org/2000/svg"
-  xmlns="http://www.w3.org/2000/svg"
-  xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-  xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-  width="{width}{unit}"
-  height="{height}{unit}"
-  viewBox="0 0 {width} {height}"
->
+    xmlns:svg="http://www.w3.org/2000/svg"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+    width="{width}{unit}"
+    height="{height}{unit}"
+    viewBox="0 0 {width} {height}"
+    >
   <sodipodi:namedview
-    inkscape:document-units="{unit}"
-    units="{unit}"
-  />
+      inkscape:document-units="{unit}"
+      units="{unit}"
+      />
 """
 
     return out

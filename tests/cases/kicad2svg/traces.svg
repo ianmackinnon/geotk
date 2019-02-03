@@ -1,39 +1,69 @@
 <svg
-  xmlns:svg="http://www.w3.org/2000/svg"
-  xmlns="http://www.w3.org/2000/svg"
-  xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-  xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-  width="297mm"
-  height="210mm"
-  viewBox="0 0 297 210"
->
+    xmlns:svg="http://www.w3.org/2000/svg"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+    width="297mm"
+    height="210mm"
+    viewBox="0 0 297 210"
+    >
   <sodipodi:namedview
-    inkscape:document-units="mm"
-    units="mm"
-  />
+      inkscape:document-units="mm"
+      units="mm"
+      />
 
   <g
-     inkscape:label="F.Cu"
-     inkscape:groupmode="layer"
-     id="layer0"
-     style="display:inline"
-     >
-    <path style="fill:none;stroke:#000000;stroke-width:0.1;stroke-miterlimit:4;stroke-dasharray:none" d="M 25.4 25.4 L 25.4 50.8 L 50.8 25.4"/>
-    <path style="fill:none;stroke:#000000;stroke-width:0.1;stroke-miterlimit:4;stroke-dasharray:none" d="M 77.47 77.47 L 81.28 62.23 L 100.33 60.96 L 96.52 74.93 L 90.17 53.34 L 87.63 71.12 L 72.39 68.58 Z"/>
-    <path style="fill:none;stroke:#000000;stroke-width:0.1;stroke-miterlimit:4;stroke-dasharray:none" d="M 77.47 77.47 L 74.93 81.28"/>
-    <path style="fill:none;stroke:#000000;stroke-width:0.1;stroke-miterlimit:4;stroke-dasharray:none" d="M 90.17 53.34 L 95.25 48.26"/>
+      inkscape:label="F.Cu"
+      inkscape:groupmode="layer"
+      id="layer-0"
+      style="display:inline"
+      >
+    <g
+        inkscape:label="0"
+        inkscape:groupmode="layer"
+        id="layer-0-0"
+        style="display:inline"
+        >
+      <path style="fill:none;stroke:#000000;stroke-width:0.1;stroke-miterlimit:4;stroke-dasharray:none" d="M 25.4 25.4 L 25.4 50.8 L 50.8 25.4"/>
+    </g>
+
+    <g
+        inkscape:label="1"
+        inkscape:groupmode="layer"
+        id="layer-0-1"
+        style="display:inline"
+        >
+      <path style="fill:none;stroke:#000000;stroke-width:0.1;stroke-miterlimit:4;stroke-dasharray:none" d="M 77.47 77.47 L 81.28 62.23 L 100.33 60.96 L 96.52 74.93 L 90.17 53.34 L 87.63 71.12 L 72.39 68.58 Z"/>
+      <path style="fill:none;stroke:#000000;stroke-width:0.1;stroke-miterlimit:4;stroke-dasharray:none" d="M 77.47 77.47 L 74.93 81.28"/>
+      <path style="fill:none;stroke:#000000;stroke-width:0.1;stroke-miterlimit:4;stroke-dasharray:none" d="M 90.17 53.34 L 95.25 48.26"/>
+    </g>
   </g>
 
   <g
-     inkscape:label="B.Cu"
-     inkscape:groupmode="layer"
-     id="layer1"
-     style="display:inline"
-     >
-    <path style="fill:none;stroke:#000000;stroke-width:0.1;stroke-miterlimit:4;stroke-dasharray:none" d="M 76.2 25.4 L 76.2 50.8 L 101.6 25.4"/>
-    <path style="fill:none;stroke:#000000;stroke-width:0.1;stroke-miterlimit:4;stroke-dasharray:none" d="M 27.94 68.58 L 34.29 59.69 L 43.18 69.85 L 35.56 80.01 Z"/>
-    <path style="fill:none;stroke:#000000;stroke-width:0.1;stroke-miterlimit:4;stroke-dasharray:none" d="M 27.94 68.58 L 24.13 68.58"/>
-    <path style="fill:none;stroke:#000000;stroke-width:0.1;stroke-miterlimit:4;stroke-dasharray:none" d="M 43.18 69.85 L 49.53 62.23"/>
-    <path style="fill:none;stroke:#000000;stroke-width:0.1;stroke-miterlimit:4;stroke-dasharray:none" d="M 43.18 63.5 L 49.53 68.58"/>
+      inkscape:label="B.Cu"
+      inkscape:groupmode="layer"
+      id="layer-1"
+      style="display:inline"
+      >
+    <g
+        inkscape:label="0"
+        inkscape:groupmode="layer"
+        id="layer-1-0"
+        style="display:inline"
+        >
+      <path style="fill:none;stroke:#000000;stroke-width:0.1;stroke-miterlimit:4;stroke-dasharray:none" d="M 76.2 25.4 L 76.2 50.8 L 101.6 25.4"/>
+    </g>
+
+    <g
+        inkscape:label="1"
+        inkscape:groupmode="layer"
+        id="layer-1-1"
+        style="display:inline"
+        >
+      <path style="fill:none;stroke:#000000;stroke-width:0.1;stroke-miterlimit:4;stroke-dasharray:none" d="M 27.94 68.58 L 34.29 59.69 L 43.18 69.85 L 35.56 80.01 Z"/>
+      <path style="fill:none;stroke:#000000;stroke-width:0.1;stroke-miterlimit:4;stroke-dasharray:none" d="M 27.94 68.58 L 24.13 68.58"/>
+      <path style="fill:none;stroke:#000000;stroke-width:0.1;stroke-miterlimit:4;stroke-dasharray:none" d="M 43.18 69.85 L 49.53 62.23"/>
+      <path style="fill:none;stroke:#000000;stroke-width:0.1;stroke-miterlimit:4;stroke-dasharray:none" d="M 43.18 63.5 L 49.53 68.58"/>
+    </g>
   </g>
 </svg>
