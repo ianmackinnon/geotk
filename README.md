@@ -75,8 +75,7 @@ Each PCB layer is represented as a layer, and each net is represented as a subla
 
 ## Caveats:
 
--   Does not read page size from KiCad file; always exports an A4 SVG.
--   Grid will only be correcly placed for A4 KiCad files.
+-   KiCad page size and grid placement will only be preserved for A4 or custom sizes.
 
 
 ## `svg2kicad`

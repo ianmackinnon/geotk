@@ -27,7 +27,14 @@ DEFAULT_WIDTH = 0.25
 REGEX = {
     "trace": re.compile(r"^\s*\(segment "),
     "origin": re.compile(r"^\s*\(grid_origin (.*) (.*)\)$"),
+    "page": re.compile(r"^\s*\(page (.*)\)$"),
 }
+
+
+
+class ParseError(Exception):
+    pass
+
 
 
 def write_svg(out, layer_net_path, width, height, unit,
@@ -291,6 +298,27 @@ def kicad_extract_origin(kicad_text):
 
 
 
+def kicad_extract_page_size(kicad_text):
+    page_sizes = {
+        "A4": (297, 210),
+    }
+    for line in kicad_text.split("\n"):
+        match = REGEX["page"].match(line)
+        if match:
+            page_text = match.group(1)
+            if page_text in page_sizes:
+                return page_sizes[page_text]
+
+            match = re.compile("^User (.*) (.*)$").match(page_text)
+            if match:
+                return [float(v) for v in match.groups()]
+
+            raise ParseError("Could not determine page size for page `{page_text}`.")
+
+    raise ParseError("No page information found.")
+
+
+
 def kicad2svg(out, kicad_file, layer=None, net=None, grid_spacing=None):
     """
     Extract traces from KiCad PCB files and save as SVG paths.
@@ -302,17 +330,27 @@ def kicad2svg(out, kicad_file, layer=None, net=None, grid_spacing=None):
 
     kicad_text = kicad_file.read()
 
+    width = 297
+    height = 210
+
+    try:
+        page_size = kicad_extract_page_size(kicad_text)
+    except ParseError as e:
+        LOG.warning(str(e))
+    else:
+        (width, height) = page_size
+
     origin = None
     if grid_spacing:
-        if "(page A4)" not in kicad_text:
-            LOG.error("KiCad page does not appear to be A4."
-                      "Grid origin will not be correctly placed.")
-
         origin = kicad_extract_origin(kicad_text)
-        origin[1] = 210 - origin[1]
+
+        if page_size:
+            origin[1] = page_size[1] - origin[1]
+        else:
+            LOG.error("Grid origin cannot be correctly placed.")
 
     layer_net_path = kicad_extract_layer_net_path(
         kicad_text, layer=layer, net=net)
 
-    write_svg(out, layer_net_path, width=297, height=210, unit="mm",
+    write_svg(out, layer_net_path, width=width, height=height, unit="mm",
               grid_spacing=grid_spacing, grid_origin=origin)
