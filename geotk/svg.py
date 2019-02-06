@@ -129,6 +129,16 @@ def transform_poly(poly, xform):
 
 
 
+def angle_difference_radians(a1, a2):
+    diff = a2 - a1
+    if diff > math.pi:
+        diff -= 2 * math.pi
+    elif diff < -math.pi:
+        diff += 2 * math.pi
+    return diff
+
+
+
 def poly_points_cubic(_command, cursor, segment, absolute, step_dist, step_angle):
     """
     Cubic Bézier spline.
@@ -149,47 +159,73 @@ def poly_points_cubic(_command, cursor, segment, absolute, step_dist, step_angle
                 cursor[1] + vertex[1]
             ))
 
-    def point(p0, p1, p2, p3, t):
-        return (
-            p0 * pow((1 - t), 3) +
-            p1 * 3 * pow((1 - t), 2) * t +
-            p2 * 3 * (1 - t) * pow(t, 2) +
-            p3 * pow(t, 3)
-        )
-
-    def ang_diff(a1, a2):
-        diff = a2 - a1
-        if diff > math.pi:
-            diff -= 2 * math.pi
-        if diff < -math.pi:
-            diff += 2 * math.pi
-        return diff
-
     p = vertex_list
 
-    a1 = math.atan2(p[1][1] - p[0][1], p[1][0] - p[0][0])
-    a2 = math.atan2(p[2][1] - p[1][1], p[2][0] - p[1][0])
-    a3 = math.atan2(p[3][1] - p[2][1], p[3][0] - p[2][0])
+    def point_1d(t, c):
+        pc = [v[c] for v in p]
+        return (
+            pc[0] * pow((1 - t), 3) +
+            pc[1] * 3 * pow((1 - t), 2) * t +
+            pc[2] * 3 * (1 - t) * pow(t, 2) +
+            pc[3] * pow(t, 3)
+        )
 
-    d1 = ang_diff(a1, a2)
-    d2 = ang_diff(a2, a3)
-    dx = p[3][0] - p[0][0]
-    dy = p[3][1] - p[0][1]
+    def tangent_1d(t, c):
+        pc = [v[c] for v in p]
+        u = 1 - t
+        pc = [v[c] for v in p]
+        return (
+            pc[0] * -3 * pow(u, 2) +
+            pc[1] * (3 * pow(u, 2) - 6 * t * u) +
+            pc[2] * (-3 * pow(t, 2) + 6 * t * u) +
+            pc[3] * 3 * pow(t, 2)
+        )
 
-    length = math.sqrt(dx * dx + dy * dy)
-    d = abs(d1) + abs(d2)
+    def point_2d(t):
+        return (point_1d(t, 0), point_1d(t, 1),)
 
-    vertex_list = []
+    def tangent_2d(t):
+        return (tangent_1d(t, 0), tangent_1d(t, 1),)
 
-    n = 1 + int(10 * d) +  int(length / 100)
-    n //= 5
-    for i in range(n):
-        t = float(i + 1) / n
-        x = point(p[0][0], p[1][0], p[2][0], p[3][0], t)
-        y = point(p[0][1], p[1][1], p[2][1], p[3][1], t)
-        vertex_list.append((x, y))
+    max_dist = None if step_dist is None else abs(step_dist) * math.sqrt(2)
+    max_angle = None if step_angle is None else abs(step_angle) * math.sqrt(2)
 
-    return vertex_list
+    def split(pa, pb, ta, tb):
+        """Split `path` in place as necessary according to dist and angle"""
+
+        do_split = False
+
+        if max_dist:
+            do_split = dist(pa, pb) > max_dist
+
+        if not do_split and max_angle:
+            tm = (ta + tb) / 2
+
+            da = tangent_2d(ta)
+            dm = tangent_2d(tm)
+            db = tangent_2d(tb)
+            aa = angle(da)
+            am = angle(dm)
+            ab = angle(db)
+
+            diff_angle = max(
+                abs(angle_difference_radians(aa, am)),
+                abs(angle_difference_radians(aa, ab))
+            )
+
+
+            diff_angle *= 180 / math.pi
+
+            do_split = diff_angle > max_angle
+
+        if not do_split:
+            return [pb]
+
+        tm = (ta + tb) / 2
+        pm = point_2d(tm)
+        return split(pa, pm, ta, tm) + split(pm, pb, tm, tb)
+
+    return split(cursor, p[3], 0, 1)
 
 
 

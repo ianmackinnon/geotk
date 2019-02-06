@@ -107,6 +107,56 @@ PATH_CASES = {
         ),
     },
 
+    "cubic-sine": {
+        "d": "M 0,5 C 5,10 10,0 15,5",
+        "result": (
+            (0, 5),
+            (15, 5),
+        ),
+    },
+
+    "cubic-sine-d3": {
+        "d": "M 0,5 C 5,10 10,0 15,5",
+        "step_dist": 3,
+        "result": (
+            (0.00, 5.00),
+            (3.75, 6.41),
+            (7.50, 5.00),
+            (11.25, 3.59),
+            (15.00, 5.00),
+        ),
+    },
+
+    "cubic-sine-a5": {
+        "d": "M 0,5 C 5,10 10,0 15,5",
+        "step_angle": 20,
+        "result": (
+            (0.00, 5.00),
+            (1.88, 6.23),
+            (3.75, 6.41),
+            (7.50, 5.00),
+            (11.25, 3.59),
+            (13.12, 3.77),
+            (15.00, 5.00),
+        ),
+    },
+
+    "cubic-sine-cont-c-d3": {
+        "d": "M 0,5  C 5,10 10,0 15,5  20,10 25,0 30,5",
+        "step_dist": 3,
+        "result": (
+            (0.00, 5.00),
+            (3.75, 6.41),
+            (7.50, 5.00),
+            (11.25, 3.59),
+            (15.00, 5.00),
+            (18.75, 6.41),
+            (22.50, 5.00),
+            (26.25, 3.59),
+            (30.00, 5.00),
+        ),
+    },
+
 }
 
 
@@ -121,43 +171,48 @@ def test_poly_points(case_name):
         step_angle=case.get("step_angle", None),
     )[0]
 
+    out_path = Path(f"/tmp/geotk-test-unit-svg-poly-points-{case_name}.svg")
+    with NamedTemporaryFile("w", encoding="utf=8", delete=False) as out:
+        out.write(header(50, 50, "mm"))
+        path_style = style({
+            "fill": "none",
+            "stroke": "#000088",
+            "stroke-width": "0.1",
+        })
+        expected_style = style({
+            "fill": "none",
+            "stroke": "#008800",
+            "stroke-width": "0.1",
+        })
+        computed_style = style({
+            "fill": "none",
+            "stroke": "#880000",
+            "stroke-width": "0.1",
+        })
+        out.write(f"""\
+  <path style="{path_style}" d="{case['d']}" />
+""")
+        out.write(f"""\
+  <path style="{expected_style}" d="{linear_path_d(case['result'])}" />
+""")
+        out.write(f"""\
+  <path style="{computed_style}" d="{linear_path_d(result)}" />
+""")
+
+        out.write(footer())
+
+    shutil.move(out.name, out_path)
+    LOG.info("Saved case case to `%s`.", out_path)
+
     try:
         assert len(result) == len(case["result"])
         for i, result_item in enumerate(result):
             assert result_item == pytest.approx(case["result"][i], 0.01)
+
     except AssertionError:
-
-        out_path = Path(f"/tmp/geotk-test-unit-svg-poly-points-{case_name}.svg")
-        with NamedTemporaryFile("w", encoding="utf=8", delete=False) as out:
-            out.write(header(50, 50, "mm"))
-            path_style = style({
-                "fill": "none",
-                "stroke": "#000088",
-                "stroke-width": "0.1",
-            })
-            expected_style = style({
-                "fill": "none",
-                "stroke": "#008800",
-                "stroke-width": "0.1",
-            })
-            computed_style = style({
-                "fill": "none",
-                "stroke": "#880000",
-                "stroke-width": "0.1",
-            })
-            out.write(f"""\
-  <path style="{path_style}" d="{case['d']}" />
-""")
-            out.write(f"""\
-  <path style="{expected_style}" d="{linear_path_d(case['result'])}" />
-""")
-            out.write(f"""\
-  <path style="{computed_style}" d="{linear_path_d(result)}" />
-""")
-
-            out.write(footer())
-
-        shutil.move(out.name, out_path)
-        LOG.warning("Saved failing case to `%s`.", out_path)
-
+        path_text = "\n"
+        for result_item in result:
+            path_text += "            (%.2f, %.2f),\n" % (
+                result_item[0], result_item[1])
+        LOG.error(path_text)
         raise
