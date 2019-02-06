@@ -48,6 +48,12 @@ def main():
         help="Suppress warnings.")
 
     parser.add_argument(
+        "--grid-spacing", "-g",
+        action="store",
+        type=float,
+        help="Grid spacing in mm.")
+
+    parser.add_argument(
         "--net", "-n",
         action="store",
         type=int,
@@ -78,7 +84,8 @@ def main():
 
     def f(out):
         with open(args.kicad, "r", encoding="utf-8") as kicad:
-            kicad2svg(out, kicad, net=args.net, layer=args.layer)
+            kicad2svg(out, kicad, net=args.net, layer=args.layer,
+                      grid_spacing=args.grid_spacing)
 
     if args.svg:
         with NamedTemporaryFile("w", encoding="utf=8", delete=False) as out:

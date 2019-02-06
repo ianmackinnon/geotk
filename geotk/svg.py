@@ -30,7 +30,7 @@ LOG = logging.getLogger("geo")
 
 
 
-def header(width, height, unit):
+def header(width, height, unit, grid_spacing=None, grid_x=None, grid_y=None):
     width = format_float(width)
     height = format_float(height)
 
@@ -44,6 +44,30 @@ def header(width, height, unit):
     height="{height}{unit}"
     viewBox="0 0 {width} {height}"
     >
+"""
+    if grid_spacing:
+        out += f"""\
+  <sodipodi:namedview
+     inkscape:document-units="mm"
+     units="mm"
+     id="namedview1582"
+     showgrid="true"
+     inkscape:zoom="3.0030208"
+     inkscape:cx="170.40971"
+     inkscape:cy="-40.677854"
+     inkscape:current-layer="svg1592">
+    <inkscape:grid
+       type="xygrid"
+       id="grid1598"
+       originx="{grid_x or 0}"
+       originy="{grid_y or 0}"
+       spacingx="{grid_spacing}"
+       spacingy="{grid_spacing}"
+       units="mm" />
+  </sodipodi:namedview>
+"""
+    else:
+        out += f"""\
   <sodipodi:namedview
       inkscape:document-units="{unit}"
       units="{unit}"

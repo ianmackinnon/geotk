@@ -41,6 +41,8 @@ def test_api(kicad2svg_case_name):
     if "n0" in kicad2svg_case_name:
         kwargs["net"] = 0
 
+    kwargs["grid_spacing"] = 0.127
+
     out = io.StringIO()
     with open(kicad_path) as fp:
         kicad2svg(out, fp, **kwargs)
@@ -68,6 +70,7 @@ def test_cli(kicad2svg_case_name):
         "kicad2svg",
         kicad_path,
         svg_pcb_result_path,
+        "-g", "0.127",
     ]
 
     if "bcu" in kicad2svg_case_name:

@@ -173,7 +173,7 @@ def test_poly_points(case_name):
 
     out_path = Path(f"/tmp/geotk-test-unit-svg-poly-points-{case_name}.svg")
     with NamedTemporaryFile("w", encoding="utf=8", delete=False) as out:
-        out.write(header(50, 50, "mm"))
+        out.write(header(50, 50, "mm", 50, 12, 23))
         path_style = style({
             "fill": "none",
             "stroke": "#000088",

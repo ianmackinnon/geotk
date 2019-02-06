@@ -26,11 +26,15 @@ DEFAULT_WIDTH = 0.25
 
 REGEX = {
     "trace": re.compile(r"^\s*\(segment "),
+    "origin": re.compile(r"^\s*\(grid_origin (.*) (.*)\)$"),
 }
 
 
-def write_svg(out, layer_net_path, width, height, unit):
-    out.write(svg_header(width, height, unit))
+def write_svg(out, layer_net_path, width, height, unit,
+              grid_spacing=None, grid_origin=None):
+    (ox, oy) = grid_origin or (None, None)
+    out.write(svg_header(
+        width, height, unit, grid_spacing=grid_spacing, grid_x=ox, grid_y=oy))
 
     path_style = style({
         "fill": "none",
@@ -247,8 +251,7 @@ def join_segment_list(segment_list):
 
 
 
-def kicad_extract_layer_net_path(kicad_file, layer=None, net=None):
-    kicad_text = kicad_file.read()
+def kicad_extract_layer_net_path(kicad_text, layer=None, net=None):
 
     layer_net_segment = defaultdict(lambda : defaultdict(list))
 
@@ -278,7 +281,17 @@ def kicad_extract_layer_net_path(kicad_file, layer=None, net=None):
 
 
 
-def kicad2svg(out, kicad_file, layer=None, net=None):
+def kicad_extract_origin(kicad_text):
+    for line in kicad_text.split("\n"):
+        match = REGEX["origin"].match(line)
+        if match:
+            return [float(v) for v in match.groups()]
+
+    return None
+
+
+
+def kicad2svg(out, kicad_file, layer=None, net=None, grid_spacing=None):
     """
     Extract traces from KiCad PCB files and save as SVG paths.
 
@@ -287,7 +300,19 @@ def kicad2svg(out, kicad_file, layer=None, net=None):
     Use millimeters for output unit.
     """
 
-    layer_net_path = kicad_extract_layer_net_path(
-        kicad_file, layer=layer, net=net)
+    kicad_text = kicad_file.read()
 
-    write_svg(out, layer_net_path, width=297, height=210, unit="mm")
+    origin = None
+    if grid_spacing:
+        if "(page A4)" not in kicad_text:
+            LOG.error("KiCad page does not appear to be A4."
+                      "Grid origin will not be correctly placed.")
+
+        origin = kicad_extract_origin(kicad_text)
+        origin[1] = 210 - origin[1]
+
+    layer_net_path = kicad_extract_layer_net_path(
+        kicad_text, layer=layer, net=net)
+
+    write_svg(out, layer_net_path, width=297, height=210, unit="mm",
+              grid_spacing=grid_spacing, grid_origin=origin)
