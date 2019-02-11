@@ -163,8 +163,16 @@ def angle_difference_radians(a1, a2):
 
 
 
-def split_bezier(point_f, tangent_f, pa, pb, ta, tb, max_dist=None, max_angle=None):
+def split_bezier(
+        point_f, tangent_f, pa, pb, ta, tb,
+        max_dist=None, max_angle=None, depth=None, parent_angle=None
+):
     """Split `path` in place as necessary according to dist and angle"""
+
+    if depth is None:
+        depth = 0
+
+    assert depth < 10
 
     def point_2d(t):
         return (point_f(t, 0), point_f(t, 1),)
@@ -172,17 +180,12 @@ def split_bezier(point_f, tangent_f, pa, pb, ta, tb, max_dist=None, max_angle=No
     def tangent_2d(t):
         return (tangent_f(t, 0), tangent_f(t, 1),)
 
-    def split(pa, pb, ta, tb):
-        return split_bezier(
-            point_f, tangent_f,
-            pa, pb, ta, tb,
-            max_dist=max_dist, max_angle=max_angle
-        )
-
     do_split = False
+    this_angle = None
 
     if max_dist:
-        do_split = dist(pa, pb) > max_dist
+        section_dist = dist(pa, pb)
+        do_split = section_dist > max_dist
 
     if not do_split and max_angle:
         tm = (ta + tb) / 2
@@ -194,18 +197,34 @@ def split_bezier(point_f, tangent_f, pa, pb, ta, tb, max_dist=None, max_angle=No
         am = angle(dm)
         ab = angle(db)
 
-        diff_angle = max(
+        section_angle = max(
             abs(angle_difference_radians(aa, am)),
             abs(angle_difference_radians(aa, ab))
         ) * 180 / math.pi
 
-        do_split = diff_angle > max_angle
+        if depth < 2 or parent_angle is None or section_angle < parent_angle:
+            # Do not split if angle is increasing (near to touching points)
+            # except for the first and second split (where curve may be
+            # changing direction)
+            if section_angle > max_angle:
+                do_split = True
+                this_angle = section_angle
 
     if not do_split:
         return [pb]
 
     tm = (ta + tb) / 2
     pm = point_2d(tm)
+
+    def split(pa, pb, ta, tb):
+        return split_bezier(
+            point_f, tangent_f,
+            pa, pb, ta, tb,
+            max_dist=max_dist, max_angle=max_angle,
+            depth=depth + 1,
+            parent_angle=this_angle,
+        )
+
     return split(pa, pm, ta, tm) + split(pm, pb, tm, tb)
 
 
