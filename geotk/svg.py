@@ -163,6 +163,101 @@ def angle_difference_radians(a1, a2):
 
 
 
+def split_bezier(point_f, tangent_f, pa, pb, ta, tb, max_dist=None, max_angle=None):
+    """Split `path` in place as necessary according to dist and angle"""
+
+    def point_2d(t):
+        return (point_f(t, 0), point_f(t, 1),)
+
+    def tangent_2d(t):
+        return (tangent_f(t, 0), tangent_f(t, 1),)
+
+    def split(pa, pb, ta, tb):
+        return split_bezier(
+            point_f, tangent_f,
+            pa, pb, ta, tb,
+            max_dist=max_dist, max_angle=max_angle
+        )
+
+    do_split = False
+
+    if max_dist:
+        do_split = dist(pa, pb) > max_dist
+
+    if not do_split and max_angle:
+        tm = (ta + tb) / 2
+
+        da = tangent_2d(ta)
+        dm = tangent_2d(tm)
+        db = tangent_2d(tb)
+        aa = angle(da)
+        am = angle(dm)
+        ab = angle(db)
+
+        diff_angle = max(
+            abs(angle_difference_radians(aa, am)),
+            abs(angle_difference_radians(aa, ab))
+        ) * 180 / math.pi
+
+        do_split = diff_angle > max_angle
+
+    if not do_split:
+        return [pb]
+
+    tm = (ta + tb) / 2
+    pm = point_2d(tm)
+    return split(pa, pm, ta, tm) + split(pm, pb, tm, tb)
+
+
+
+def poly_points_quadratic(_command, cursor, segment, absolute, step_dist, step_angle):
+    """
+    Quadratic Bézier spline.
+
+    Return absolute points
+    """
+
+    vertex_list = [tuple(cursor)]
+    while segment:
+        vertex = tuple(segment[:2])
+        segment = segment[2:]
+
+        if absolute:
+            vertex_list.append(tuple(vertex))
+        else:
+            vertex_list.append((
+                cursor[0] + vertex[0],
+                cursor[1] + vertex[1]
+            ))
+
+    p = vertex_list
+
+    def point_f(t, c):
+        pc = [v[c] for v in p]
+        u = 1 - t
+        return (
+            pc[0] * pow(u, 2) +
+            pc[1] * 2 * u * t +
+            pc[2] * pow(t, 2)
+        )
+
+    def tangent_f(t, c):
+        pc = [v[c] for v in p]
+        u = 1 - t
+        pc = [v[c] for v in p]
+        return (
+            pc[0] * -2 * u +
+            pc[2] * 2 * t
+        )
+
+    max_dist = None if step_dist is None else abs(step_dist) * math.sqrt(2)
+    max_angle = None if step_angle is None else abs(step_angle) * math.sqrt(2)
+
+    return split_bezier(point_f, tangent_f, cursor, p[2], 0, 1,
+                        max_dist=max_dist, max_angle=max_angle)
+
+
+
 def poly_points_cubic(_command, cursor, segment, absolute, step_dist, step_angle):
     """
     Cubic Bézier spline.
@@ -185,7 +280,7 @@ def poly_points_cubic(_command, cursor, segment, absolute, step_dist, step_angle
 
     p = vertex_list
 
-    def point_1d(t, c):
+    def point_f(t, c):
         pc = [v[c] for v in p]
         return (
             pc[0] * pow((1 - t), 3) +
@@ -194,7 +289,7 @@ def poly_points_cubic(_command, cursor, segment, absolute, step_dist, step_angle
             pc[3] * pow(t, 3)
         )
 
-    def tangent_1d(t, c):
+    def tangent_f(t, c):
         pc = [v[c] for v in p]
         u = 1 - t
         pc = [v[c] for v in p]
@@ -205,51 +300,11 @@ def poly_points_cubic(_command, cursor, segment, absolute, step_dist, step_angle
             pc[3] * 3 * pow(t, 2)
         )
 
-    def point_2d(t):
-        return (point_1d(t, 0), point_1d(t, 1),)
-
-    def tangent_2d(t):
-        return (tangent_1d(t, 0), tangent_1d(t, 1),)
-
     max_dist = None if step_dist is None else abs(step_dist) * math.sqrt(2)
     max_angle = None if step_angle is None else abs(step_angle) * math.sqrt(2)
 
-    def split(pa, pb, ta, tb):
-        """Split `path` in place as necessary according to dist and angle"""
-
-        do_split = False
-
-        if max_dist:
-            do_split = dist(pa, pb) > max_dist
-
-        if not do_split and max_angle:
-            tm = (ta + tb) / 2
-
-            da = tangent_2d(ta)
-            dm = tangent_2d(tm)
-            db = tangent_2d(tb)
-            aa = angle(da)
-            am = angle(dm)
-            ab = angle(db)
-
-            diff_angle = max(
-                abs(angle_difference_radians(aa, am)),
-                abs(angle_difference_radians(aa, ab))
-            )
-
-
-            diff_angle *= 180 / math.pi
-
-            do_split = diff_angle > max_angle
-
-        if not do_split:
-            return [pb]
-
-        tm = (ta + tb) / 2
-        pm = point_2d(tm)
-        return split(pa, pm, ta, tm) + split(pm, pb, tm, tb)
-
-    return split(cursor, p[3], 0, 1)
+    return split_bezier(point_f, tangent_f, cursor, p[3], 0, 1,
+                        max_dist=max_dist, max_angle=max_angle)
 
 
 
@@ -450,10 +505,10 @@ def path_to_poly_list(path, step_dist=None, step_angle=None):
         #     "length": 4,
         #     "path": poly_points_cubic,
         # },
-        # "Q": {
-        #     "length": 4,
-        #     "path": poly_points_quadratic,
-        # },
+        "Q": {
+            "length": 4,
+            "path": poly_points_quadratic,
+        },
         # "T": {
         #     "length": 2,
         #     "path": poly_points_quadratic,
