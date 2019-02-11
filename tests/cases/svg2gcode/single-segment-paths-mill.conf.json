@@ -1,0 +1,7 @@
+{
+  "z-safety": -20,
+  "z-material": -32,
+  "z-mill": -50,
+  "z-layer-depth": 10,
+  "feedrate": 2000
+}
