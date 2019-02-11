@@ -22,7 +22,23 @@ LOG = logging.getLogger("svg2gcode")
 
 
 
-def write_gcode(out, paths, conf):
+def format_gcode(d):
+    command = []
+    for k, v in d.items():
+        param = k
+        if v is not None:
+            param += format_float(v)
+        command.append(param)
+    return " ".join(command)
+
+
+
+def write_gcode(out, d):
+    out.write(format_gcode(d) + "\n")
+
+
+
+def write_paths_gcode(out, paths, conf):
     """
     Vertex numbers start from 1.
     """
@@ -35,15 +51,34 @@ def write_gcode(out, paths, conf):
         if not path:
             continue
 
-        out.write(f"G0 X{format_float(path[0][0])} Y{format_float(path[0][1])}\n")
-        out.write(f"G1 Z{format_float(conf['z-mill'])}\n")
+        write_gcode(out, {
+            "G0": None,
+            "X": path[0][0],
+            "Y": path[0][1],
+        })
+        write_gcode(out, {
+            "G1": None,
+            "Z": conf['z-mill'],
+        })
+
         for vertex in path[1:]:
-            out.write(f"G1 X{format_float(vertex[0])} Y{format_float(vertex[1])}\n")
-        out.write(f"G1 Z{format_float(conf['z-safety'])}\n")
+            write_gcode(out, {
+                "G1": None,
+                "X": vertex[0],
+                "Y": vertex[1],
+            })
+
+        write_gcode(out, {
+            "G1": None,
+            "Z": conf['z-safety'],
+        })
 
 
 
-def svg2gcode(out, svg_file, conf):
+def svg2gcode(
+        out, svg_file, conf,
+        step_dist=None, step_angle=None
+):
     """
     Write paths in GCODE format.
 
@@ -52,5 +87,8 @@ def svg2gcode(out, svg_file, conf):
     Use millimeters for output unit.
     """
 
-    paths = svg2paths(svg_file)
-    write_gcode(out, paths, conf)
+    paths = svg2paths(
+        svg_file,
+        step_dist=step_dist, step_angle=step_angle
+    )
+    write_paths_gcode(out, paths, conf)

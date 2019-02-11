@@ -38,7 +38,7 @@ def test_api(svg2kicad_case_name):
     out = io.StringIO()
     with open(svg_path) as svg_file, \
          open(kicad_src_path) as kicad_src_file:
-        svg2kicad(out, svg_file, kicad_src_file)
+        svg2kicad(out, svg_file, kicad_src_file, step_dist=30, step_angle=15)
 
     kicad_result_text = out.getvalue()
 
@@ -49,7 +49,8 @@ def test_api(svg2kicad_case_name):
 def test_cli(svg2kicad_case_name):
     (svg_path, kicad_src_path, kicad_known_path) = get_test_case(
         "svg2kicad", svg2kicad_case_name)
-    kicad_result_path = f"/tmp/geotk-test-svg2kicad-{svg2kicad_case_name}.kicad_pcb"
+    kicad_result_path = \
+        f"/tmp/geotk-test-svg2kicad-{svg2kicad_case_name}.kicad_pcb"
 
     try:
         os.remove(kicad_result_path)
@@ -64,6 +65,8 @@ def test_cli(svg2kicad_case_name):
         svg_path,
         kicad_src_path,
         kicad_result_path,
+        "--distance-step", "30",
+        "--angle-step", "15",
     ]
 
     process = Popen(cmd, stdout=PIPE, stderr=PIPE)

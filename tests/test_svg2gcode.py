@@ -43,7 +43,7 @@ def test_api(svg2gcode_case_name):
         conf = json.load(fp)
 
     with open(svg_path) as fp:
-        svg2gcode(out, fp, conf)
+        svg2gcode(out, fp, conf, step_dist=30, step_angle=15)
 
     gcode_result_text = out.getvalue()
 
@@ -69,6 +69,8 @@ def test_cli(svg2gcode_case_name):
         conf_path,
         svg_path,
         gcode_result_path,
+        "--distance-step", "30",
+        "--angle-step", "15",
     ]
 
     process = Popen(cmd, stdout=PIPE, stderr=PIPE)

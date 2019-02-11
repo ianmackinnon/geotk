@@ -650,7 +650,12 @@ scale\(
 
 
 
-def extract_paths(node, xform=None, with_layers=None, depth=None):
+def extract_paths(
+        node,
+        xform=None, with_layers=None,
+        step_dist=None, step_angle=None,
+        depth=None,
+):
     if xform is None:
         xform = np.identity(3)
     if depth is None:
@@ -669,7 +674,7 @@ def extract_paths(node, xform=None, with_layers=None, depth=None):
 
     if node.name == "path":
         path = node.attrs["d"]
-        poly_list = path_to_poly_list(path)
+        poly_list = path_to_poly_list(path, step_dist=step_dist, step_angle=step_angle)
         poly_list = [transform_poly(poly, xform) for poly in poly_list]
         paths += poly_list
 
@@ -686,7 +691,9 @@ def extract_paths(node, xform=None, with_layers=None, depth=None):
             for child in node:
                 sub_paths += extract_paths(
                     child, xform=np.copy(xform),
-                    with_layers=with_layers, depth=depth + 1)
+                    with_layers=with_layers,
+                    step_dist=step_dist, step_angle=step_angle,
+                    depth=depth + 1)
         else:
             if label:
                 LOG.debug(label)
@@ -713,7 +720,11 @@ def extract_paths(node, xform=None, with_layers=None, depth=None):
 
 
 
-def svg2paths(svg_file, invert_y=True, with_layers=None):
+def svg2paths(
+        svg_file,
+        invert_y=True, with_layers=None,
+        step_dist=None, step_angle=None
+):
     LOG.info("Converting %s", svg_file.name)
 
     svg_text = svg_file.read()
@@ -753,6 +764,10 @@ def svg2paths(svg_file, invert_y=True, with_layers=None):
                 [0, 0, 1]
             ])
 
-    paths = extract_paths(svg, xform=xform, with_layers=with_layers)
+    paths = extract_paths(
+        svg,
+        xform=xform, with_layers=with_layers,
+        step_dist=step_dist, step_angle=step_angle
+    )
 
     return paths

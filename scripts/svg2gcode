@@ -49,16 +49,25 @@ def main():
         help="Suppress warnings.")
 
     parser.add_argument(
+        "--angle-step", "-A",
+        action="store",
+        type=float,
+        help="Target segment angle for linearization of curved paths.")
+    parser.add_argument(
+        "--distance-step", "-D",
+        action="store",
+        type=float,
+        help="Target segment distance for linearization of curved paths.")
+
+    parser.add_argument(
         "conf",
         metavar="CONF",
         action="store",
         help="Path to configuration file in JSON format.")
-
     parser.add_argument(
         "svg",
         metavar="SVG",
         help="Path to SVG file.")
-
     parser.add_argument(
         "gcode",
         metavar="GCODE",
@@ -75,17 +84,21 @@ def main():
     with open(args.conf) as conf_file:
         conf = json.load(conf_file)
 
-    def f(out):
+    def wrapper(out):
         with open(args.svg, "r", encoding="utf-8") as svg:
-            svg2gcode(out, svg, conf=conf)
+            svg2gcode(
+                out, svg,
+                conf=conf,
+                step_dist=args.distance_step, step_angle=args.angle_step
+            )
 
     if args.gcode:
         with NamedTemporaryFile("w", encoding="utf=8", delete=False) as out:
             os.fchmod(out.fileno(), os.stat(args.svg).st_mode)
-            f(out)
+            wrapper(out)
         shutil.move(out.name, args.gcode)
     else:
-        f(sys.stdout)
+        wrapper(sys.stdout)
 
 
 

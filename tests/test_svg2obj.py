@@ -38,7 +38,7 @@ def test_api(svg2obj_case_name):
 
     out = io.StringIO()
     with open(svg_path) as fp:
-        svg2obj(out, fp)
+        svg2obj(out, fp, step_dist=30, step_angle=15)
 
     obj_result_text = out.getvalue()
 
@@ -64,6 +64,8 @@ def test_cli(svg2obj_case_name):
         "svg2obj",
         svg_path,
         obj_result_path,
+        "--distance-step", "30",
+        "--angle-step", "15",
     ]
 
     process = Popen(cmd, stdout=PIPE, stderr=PIPE)

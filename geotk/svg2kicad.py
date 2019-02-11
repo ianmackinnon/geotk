@@ -101,7 +101,11 @@ def replace_kicad_traces(
 
 
 
-def svg2kicad(out, svg_file, kicad_src_file, width=None, layer=None, net=None):
+def svg2kicad(
+        out, svg_file, kicad_src_file,
+        width=None, layer=None, net=None,
+        step_dist=None, step_angle=None
+):
     """
     Replace traces in KiCad source file with paths from SVG file.
 
@@ -110,6 +114,10 @@ def svg2kicad(out, svg_file, kicad_src_file, width=None, layer=None, net=None):
     Use millimeters for output unit.
     """
 
-    layers_paths = svg2paths(svg_file, invert_y=False, with_layers=True)
+    layers_paths = svg2paths(
+        svg_file,
+        invert_y=False, with_layers=True,
+        step_dist=step_dist, step_angle=step_angle
+    )
     replace_kicad_traces(
         out, kicad_src_file, layers_paths, width=width, layer=layer, net=net)

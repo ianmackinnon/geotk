@@ -36,7 +36,8 @@ def main():
         color_log(log)
 
     parser = argparse.ArgumentParser(
-        description="Convert paths in an SVG file to polygons in Wavefront OBJ format.")
+        description="""\
+Convert paths in an SVG file to polygons in Wavefront OBJ format.""")
 
     parser.add_argument(
         "--verbose", "-v",
@@ -48,10 +49,20 @@ def main():
         help="Suppress warnings.")
 
     parser.add_argument(
+        "--angle-step", "-A",
+        action="store",
+        type=float,
+        help="Target segment angle for linearization of curved paths.")
+    parser.add_argument(
+        "--distance-step", "-D",
+        action="store",
+        type=float,
+        help="Target segment distance for linearization of curved paths.")
+
+    parser.add_argument(
         "svg",
         metavar="SVG",
         help="Path to SVG file.")
-
     parser.add_argument(
         "obj",
         metavar="OBJ",
@@ -65,17 +76,20 @@ def main():
     for log in LOG, log_geo:
         log.setLevel(level)
 
-    def f(out):
+    def wrapper(out):
         with open(args.svg, "r", encoding="utf-8") as svg:
-            svg2obj(out, svg)
+            svg2obj(
+                out, svg,
+                step_dist=args.distance_step, step_angle=args.angle_step
+            )
 
     if args.obj:
         with NamedTemporaryFile("w", encoding="utf=8", delete=False) as out:
             os.fchmod(out.fileno(), os.stat(args.svg).st_mode)
-            f(out)
+            wrapper(out)
         shutil.move(out.name, args.obj)
     else:
-        f(sys.stdout)
+        wrapper(sys.stdout)
 
 
 
