@@ -20,6 +20,7 @@ import logging
 import argparse
 from tempfile import NamedTemporaryFile
 
+from geotk.args import base_parser
 from geotk.common import color_log
 from geotk.kicad2svg import kicad2svg
 
@@ -30,22 +31,9 @@ LOG = logging.getLogger("kicad2svg")
 
 
 def main():
-    log_geo = logging.getLogger("geo")
-    for log in LOG, log_geo:
-        log.addHandler(logging.StreamHandler())
-        color_log(log)
-
     parser = argparse.ArgumentParser(
+        parents=[base_parser()],
         description="Extract traces from a KiCad PCB file as SVG paths.")
-
-    parser.add_argument(
-        "--verbose", "-v",
-        action="count", default=0,
-        help="Print verbose information for debugging.")
-    parser.add_argument(
-        "--quiet", "-q",
-        action="count", default=0,
-        help="Suppress warnings.")
 
     parser.add_argument(
         "--grid-spacing", "-g",
@@ -79,10 +67,16 @@ def main():
 
     level = (logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG)[
         max(0, min(3, 1 + args.verbose - args.quiet))]
-    for log in LOG, log_geo:
+
+    handler = logging.StreamHandler()
+    for name in ("kicad2svg", "svg"):
+        log = logging.getLogger(name)
+        log.addHandler(handler)
+        color_log(log)
         log.setLevel(level)
 
-    def f(out):
+
+    def wrapper(out):
         with open(args.kicad, "r", encoding="utf-8") as kicad:
             kicad2svg(out, kicad, net=args.net, layer=args.layer,
                       grid_spacing=args.grid_spacing)
@@ -90,10 +84,10 @@ def main():
     if args.svg:
         with NamedTemporaryFile("w", encoding="utf=8", delete=False) as out:
             os.fchmod(out.fileno(), os.stat(args.kicad).st_mode)
-            f(out)
+            wrapper(out)
         shutil.move(out.name, args.svg)
     else:
-        f(sys.stdout)
+        wrapper(sys.stdout)
 
 
 

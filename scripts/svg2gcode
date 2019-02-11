@@ -21,6 +21,7 @@ import logging
 import argparse
 from tempfile import NamedTemporaryFile
 
+from geotk.args import base_parser, svg_input_parser
 from geotk.common import color_log
 from geotk.svg2gcode import svg2gcode
 
@@ -31,33 +32,10 @@ LOG = logging.getLogger("svg2gcode")
 
 
 def main():
-    log_geo = logging.getLogger("geo")
-    for log in LOG, log_geo:
-        log.addHandler(logging.StreamHandler())
-        color_log(log)
-
     parser = argparse.ArgumentParser(
+        parents=[base_parser(), svg_input_parser()],
         description="Convert paths in an SVG file to "
         "G-code format for plotting.")
-    parser.add_argument(
-        "--verbose", "-v",
-        action="count", default=0,
-        help="Print verbose information for debugging.")
-    parser.add_argument(
-        "--quiet", "-q",
-        action="count", default=0,
-        help="Suppress warnings.")
-
-    parser.add_argument(
-        "--angle-step", "-A",
-        action="store",
-        type=float,
-        help="Target segment angle for linearization of curved paths.")
-    parser.add_argument(
-        "--distance-step", "-D",
-        action="store",
-        type=float,
-        help="Target segment distance for linearization of curved paths.")
 
     parser.add_argument(
         "conf",
@@ -78,8 +56,14 @@ def main():
 
     level = (logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG)[
         max(0, min(3, 1 + args.verbose - args.quiet))]
-    for log in LOG, log_geo:
+
+    handler = logging.StreamHandler()
+    for name in ("svg2gcode", "svg"):
+        log = logging.getLogger(name)
+        log.addHandler(handler)
+        color_log(log)
         log.setLevel(level)
+
 
     with open(args.conf) as conf_file:
         conf = json.load(conf_file)

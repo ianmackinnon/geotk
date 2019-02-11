@@ -20,6 +20,7 @@ import logging
 import argparse
 from tempfile import NamedTemporaryFile
 
+from geotk.args import base_parser
 from geotk.common import color_log
 from geotk.obj2svg import obj2svg
 
@@ -30,22 +31,10 @@ LOG = logging.getLogger("obj2svg")
 
 
 def main():
-    log_geo = logging.getLogger("geo")
-    for log in LOG, log_geo:
-        log.addHandler(logging.StreamHandler())
-        color_log(log)
-
     parser = argparse.ArgumentParser(
-        description="Convert polygons in a Wavefront OBJ file to paths in SVG format.")
-
-    parser.add_argument(
-        "--verbose", "-v",
-        action="count", default=0,
-        help="Print verbose information for debugging.")
-    parser.add_argument(
-        "--quiet", "-q",
-        action="count", default=0,
-        help="Suppress warnings.")
+        parents=[base_parser()],
+        description="""\
+Convert polygons in a Wavefront OBJ file to paths in SVG format.""")
 
     parser.add_argument(
         "--unit", "-u",
@@ -67,19 +56,27 @@ def main():
 
     level = (logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG)[
         max(0, min(3, 1 + args.verbose - args.quiet))]
-    LOG.setLevel(level)
 
-    def f(out):
+    handler = logging.StreamHandler()
+    for name in ("obj2svg", "svg"):
+        log = logging.getLogger(name)
+        log.addHandler(handler)
+        color_log(log)
+        log.setLevel(level)
+
+
+    def wrapper(out):
         with open(args.obj, "r", encoding="utf-8") as obj:
             obj2svg(out, obj, unit=args.unit)
+
 
     if args.svg:
         with NamedTemporaryFile("w", encoding="utf=8", delete=False) as out:
             os.fchmod(out.fileno(), os.stat(args.obj).st_mode)
-            f(out)
+            wrapper(out)
         shutil.move(out.name, args.svg)
     else:
-        f(sys.stdout)
+        wrapper(sys.stdout)
 
 
 

@@ -22,7 +22,7 @@ from geotk.common import format_whitespace, format_float
 
 
 
-LOG = logging.getLogger("geo")
+LOG = logging.getLogger("svg")
 
 
 
