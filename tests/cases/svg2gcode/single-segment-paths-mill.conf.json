@@ -1,7 +1,9 @@
 {
-  "z-safety": -20,
-  "z-material": -32,
-  "z-mill": -50,
-  "z-layer-depth": 10,
-  "feedrate": 2000
+  "unit": "mm",
+  "feedrate": 2000,
+  "z-safety-direction": 1,
+  "z-safety-distance": 12,
+  "z-base-coordinate": -50,
+  "z-material-thickness": 18,
+  "z-layer-depth": 10
 }

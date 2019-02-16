@@ -13,12 +13,94 @@
 
 import logging
 
+import jsonschema
+
 from geotk.common import format_float
 from geotk.svg import svg2paths
 
 
 
 LOG = logging.getLogger("svg2gcode")
+
+DEFAULTS = {
+    "linearization-target-angle": 5,
+}
+
+CONF_SCHEMA = {
+    "type": "object",
+    "required": [
+        "unit",
+        "feedrate",
+        "z-safety-direction",
+        "z-safety-distance",
+    ],
+    "properties": {
+        "unit": {
+            "type": "string",
+            "value": "mm",
+        },
+        "feedrate": {
+            "type": "number",
+            "minimum": 0,
+            "exclusiveMinimum": True,
+        },
+        "linearization-target-angle": {
+            "type": [
+                "number",
+                "null",
+            ],
+            "minimum": 0,
+            "exclusiveMinimum": True,
+        },
+        "linearization-target-distance": {
+            "type": [
+                "number",
+                "null",
+            ],
+            "minimum": 0,
+            "exclusiveMinimum": True,
+        },
+        "z-safety-direction": {
+            "type": "integer",
+            "value": [
+                -1,
+                1
+            ]
+        },
+        "z-base-coordinate": {
+            "type": "number",
+        },
+        "z-safety-distance": {
+            "type": [
+                "number",
+                "null",
+            ],
+            "minimum": 0,
+        },
+        "z-layer-depth": {
+            "type": [
+                "number",
+                "null",
+            ],
+            "minimum": 0,
+            "exclusiveMinimum": True,
+        },
+        "z-material-thickness": {
+            "type": [
+                "number",
+                "null",
+            ],
+            "minimum": 0,
+        },
+        "z-mill-wasteboard-distance": {
+            "type": [
+                "number",
+                "null",
+            ],
+            "minimum": 0,
+        },
+    }
+}
 
 
 
@@ -52,47 +134,35 @@ def write_paths_gcode(out, paths, conf):
     Vertex numbers start from 1.
     """
 
-    assert conf["z-mill"] is not None
-    assert conf["z-safety"] is not None
+    jsonschema.validate(conf, CONF_SCHEMA)
 
-    z_layer_depth = conf.get("z-layer-depth", None)
-    z_material = conf.get("z-material", None)
-    material_depth = 0
+    z_dir = conf.get("z-safety-direction", None)
+    z_layer = conf.get("z-layer-depth", None)
+    z_base = conf.get("z-base-coordinate", 0)
+    z_thickness = (conf.get("z-material-thickness", 0) +
+                   conf.get("z-mill-wasteboard-distance", 0))
 
-    if z_material is None:
-        z_material = conf["z-mill"]
+    z_start = z_base + conf.get("z-material-thickness", 0) * z_dir
+    z_safe = z_start + conf.get("z-safety-distance", 0) * z_dir
 
-    material_depth = conf["z-mill"] - z_material
-    material_sign = sign(material_depth)
-    material_depth = abs(material_depth)
-
-    if z_layer_depth is None:
-        z_layer_depth = material_depth
 
     write_gcode(out, {
         "G90": None
     })
     write_gcode(out, {
-        "F": conf['feedrate']
+        "F": conf["feedrate"]
     })
     write_gcode(out, {
         "G0": None,
-        "Z": conf['z-safety']
+        "Z": z_safe
     })
 
-    layer_depth = 0
+    z_target = z_start
+    max_depth = 0
     while True:
-        layer_depth += z_layer_depth
-
-        LOG.info("zm %s", z_material)
-        LOG.info("layer depth %s", layer_depth)
-        LOG.info("material depth %s", material_depth)
-
-        cut_depth = min(material_depth, layer_depth)
-        target_depth = z_material + material_sign * cut_depth
-
-        LOG.info("cut depth %s", cut_depth)
-        LOG.info("target depth %s", target_depth)
+        if z_layer is not None:
+            max_depth += z_layer
+            z_target = z_start - min(z_thickness, max_depth) * z_dir
 
         for path in paths:
             if not path:
@@ -105,7 +175,7 @@ def write_paths_gcode(out, paths, conf):
             })
             write_gcode(out, {
                 "G1": None,
-                "Z": target_depth,
+                "Z": z_target,
             })
 
             for vertex in path[1:]:
@@ -117,10 +187,10 @@ def write_paths_gcode(out, paths, conf):
 
             write_gcode(out, {
                 "G1": None,
-                "Z": conf['z-safety'],
+                "Z": z_safe,
             })
 
-        if not layer_depth < material_depth:
+        if z_layer is None or max_depth >= z_thickness:
             break
 
 
@@ -136,6 +206,13 @@ def svg2gcode(
 
     Use millimeters for output unit.
     """
+
+    if step_dist is None:
+        step_dist = conf.get("linearization-target-angle", None)
+
+    if step_angle is None:
+        step_angle = conf.get("linearization-target-angle",
+                              DEFAULTS["linearization-target-angle"])
 
     paths = svg2paths(
         svg_file,

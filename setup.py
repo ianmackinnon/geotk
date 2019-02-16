@@ -36,7 +36,7 @@ setuptools.setup(
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: OS Independent",
     ],
-    install_requires=["numpy", "beautifulsoup4", "lxml"],
+    install_requires=["beautifulsoup4", "jsonschema", "lxml", "numpy"],
     python_requires='>=3',
     scripts=["scripts/obj2svg", "scripts/svg2obj",
              "scripts/svg2gcode",

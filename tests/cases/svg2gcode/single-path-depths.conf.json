@@ -1,5 +1,7 @@
 {
-  "z-safety": -24,
-  "z-mill": -54,
-  "feedrate": 1000
+  "unit": "mm",
+  "feedrate": 1000,
+  "z-safety-direction": 1,
+  "z-safety-distance": 30,
+  "z-base-coordinate": -54
 }

@@ -1,7 +1,10 @@
 {
-  "z-safety": -33.5,
-  "z-material": -35,
-  "z-mill": -38,
+  "unit": "mm",
+  "feedrate": 1500,
+  "z-safety-direction": 1,
+  "z-safety-distance": 1.5,
+  "z-base-coordinate": -38,
+  "z-material-thickness": 3,
   "z-layer-depth": 0.5,
-  "feedrate": 1500
+  "linearization-target-angle": 15
 }
