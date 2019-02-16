@@ -11,9 +11,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import io
+import os
 import logging
 import warnings
 from pathlib import Path
+from subprocess import Popen, PIPE
 from collections import defaultdict, namedtuple
 
 
@@ -109,3 +112,70 @@ def pytest_generate_tests(metafunc):
         if fixture_name in metafunc.fixturenames:
             metafunc.parametrize(
                 fixture_name, get_case_names(func_name, case))
+
+
+
+def proc_command(cmd):
+    process = Popen(cmd, stdout=PIPE, stderr=PIPE)
+    (out, err) = process.communicate()
+    status = process.returncode
+
+    if out:
+        LOG.error(out.decode("utf-8"))
+
+    if err:
+        LOG.error(err.decode("utf-8"))
+
+    assert not out
+    assert not err
+    assert not status
+
+
+
+def proc_diff(path1, path2):
+    cmd = [
+        "diff", "-q",
+        path1,
+        path2,
+    ]
+    process = Popen(cmd, stdout=PIPE, stderr=PIPE)
+    (out, err) = process.communicate()
+    status = process.returncode
+
+    if out:
+        LOG.error(out)
+
+    if err:
+        LOG.error(err)
+
+    assert not out
+    assert not err
+    assert not status
+
+
+
+def api_compare(known_path, f):
+    with open(known_path) as fp:
+        known_text = fp.read()
+
+    out = io.StringIO()
+    f(out)
+    result_text = out.getvalue()
+
+    assert result_text == known_text
+
+
+
+def cli_compare(known_path, name, case, cmd):
+    result_path = f"/tmp/geotk-test-{name}-{case}.obj"
+
+    try:
+        os.remove(result_path)
+    except FileNotFoundError:
+        pass
+
+    proc_command([result_path if v == "__result_path__" else v for v in cmd])
+    proc_diff(
+        known_path,
+        result_path,
+    )

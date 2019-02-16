@@ -11,18 +11,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
-import io
 import sys
 import json
 from pathlib import Path
-from subprocess import Popen, PIPE
 
 sys.path.append("../")
 
 from geotk.svg2gcode import svg2gcode
 
-from conftest import get_test_case
+from conftest import get_test_case, api_compare, cli_compare
 
 
 
@@ -34,58 +31,25 @@ def test_api(svg2gcode_case_name):
     (conf_path, svg_path, gcode_known_path) = get_test_case(
         "svg2gcode", svg2gcode_case_name)
 
-    with open(gcode_known_path) as fp:
-        gcode_known_text = fp.read()
-
-    out = io.StringIO()
-
     with open(conf_path) as fp:
         conf = json.load(fp)
 
-    with open(svg_path) as fp:
-        svg2gcode(out, fp, conf)
+    def f(out):
+        with open(svg_path) as fp:
+            svg2gcode(out, fp, conf)
 
-    gcode_result_text = out.getvalue()
-
-    assert gcode_result_text == gcode_known_text
+    api_compare(gcode_known_path, f)
 
 
 
 def test_cli(svg2gcode_case_name):
     (conf_path, svg_path, gcode_known_path) = get_test_case(
         "svg2gcode", svg2gcode_case_name)
-    gcode_result_path = f"/tmp/geotk-test-svg2gcode-{svg2gcode_case_name}.gcode"
 
-    try:
-        os.remove(gcode_result_path)
-    except FileNotFoundError:
-        pass
 
-    with open(gcode_known_path) as fp:
-        gcode_known_text = fp.read()
-
-    cmd = [
+    cli_compare(gcode_known_path, "svg2gcode", svg2gcode_case_name, [
         "svg2gcode",
         conf_path,
         svg_path,
-        gcode_result_path,
-    ]
-
-    process = Popen(cmd, stdout=PIPE, stderr=PIPE)
-    (out, err) = process.communicate()
-    status = process.returncode
-    assert not out
-    assert not err
-    assert not status
-
-    cmd = [
-        "diff", "-q",
-        gcode_known_path,
-        gcode_result_path,
-    ]
-    process = Popen(cmd, stdout=PIPE, stderr=PIPE)
-    (out, err) = process.communicate()
-    status = process.returncode
-    assert not out
-    assert not err
-    assert not status
+        "__result_path__",
+    ])

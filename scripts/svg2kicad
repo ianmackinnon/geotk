@@ -85,7 +85,8 @@ Replace a net's traces in a KiCad PCB file with paths from an SVG.""")
             svg2kicad(
                 out, svg, kicad_src,
                 layer=args.layer, net=args.net,
-                step_dist=args.distance_step, step_angle=args.angle_step
+                step_dist=args.distance_step, step_angle=args.angle_step,
+                step_min=args.minimum_step
             )
 
 

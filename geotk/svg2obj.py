@@ -52,7 +52,7 @@ def write_obj(out, paths):
 
 def svg2obj(
         out, svg_file,
-        step_dist=None, step_angle=None
+        step_dist=None, step_angle=None, step_min=None
 ):
     """
     Write paths in OBJ format.
@@ -64,6 +64,7 @@ def svg2obj(
 
     paths = svg2paths(
         svg_file,
-        step_dist=step_dist, step_angle=step_angle
+        step_dist=step_dist, step_angle=step_angle,
+        step_min=step_min
     )
     write_obj(out, paths)

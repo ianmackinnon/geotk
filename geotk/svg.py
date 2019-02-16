@@ -165,14 +165,13 @@ def angle_difference_radians(a1, a2):
 
 def split_bezier(
         point_f, tangent_f, pa, pb, ta, tb,
-        max_dist=None, max_angle=None, depth=None, parent_angle=None
+        min_dist=None, max_dist=None, max_angle=None,
+        depth=None, parent_angle=None
 ):
     """Split `path` in place as necessary according to dist and angle"""
 
     if depth is None:
         depth = 0
-
-    assert depth < 10
 
     def point_2d(t):
         return (point_f(t, 0), point_f(t, 1),)
@@ -183,32 +182,34 @@ def split_bezier(
     do_split = False
     this_angle = None
 
-    if max_dist:
-        section_dist = dist(pa, pb)
-        do_split = section_dist > max_dist
+    section_dist = dist(pa, pb)
 
-    if not do_split and max_angle:
-        tm = (ta + tb) / 2
+    if min_dist is None or section_dist > min_dist:
+        if max_dist:
+            do_split = section_dist > max_dist
 
-        da = tangent_2d(ta)
-        dm = tangent_2d(tm)
-        db = tangent_2d(tb)
-        aa = angle(da)
-        am = angle(dm)
-        ab = angle(db)
+        if not do_split and max_angle:
+            tm = (ta + tb) / 2
 
-        section_angle = max(
-            abs(angle_difference_radians(aa, am)),
-            abs(angle_difference_radians(aa, ab))
-        ) * 180 / math.pi
+            da = tangent_2d(ta)
+            dm = tangent_2d(tm)
+            db = tangent_2d(tb)
+            aa = angle(da)
+            am = angle(dm)
+            ab = angle(db)
 
-        if depth < 2 or parent_angle is None or section_angle < parent_angle:
-            # Do not split if angle is increasing (near to touching points)
-            # except for the first and second split (where curve may be
-            # changing direction)
-            if section_angle > max_angle:
-                do_split = True
-                this_angle = section_angle
+            section_angle = max(
+                abs(angle_difference_radians(aa, am)),
+                abs(angle_difference_radians(aa, ab))
+            ) * 180 / math.pi
+
+            if depth < 2 or parent_angle is None or section_angle < parent_angle:
+                # Do not split if angle is increasing (near to touching points)
+                # except for the first and second split (where curve may be
+                # changing direction)
+                if section_angle > max_angle:
+                    do_split = True
+                    this_angle = section_angle
 
     if not do_split:
         return [pb]
@@ -220,7 +221,7 @@ def split_bezier(
         return split_bezier(
             point_f, tangent_f,
             pa, pb, ta, tb,
-            max_dist=max_dist, max_angle=max_angle,
+            min_dist=min_dist, max_dist=max_dist, max_angle=max_angle,
             depth=depth + 1,
             parent_angle=this_angle,
         )
@@ -229,7 +230,10 @@ def split_bezier(
 
 
 
-def poly_points_quadratic(_command, cursor, segment, absolute, step_dist, step_angle):
+def poly_points_quadratic(
+        command, cursor, segment, absolute,
+        step_dist=None, step_angle=None, step_min=None
+):
     """
     Quadratic Bézier spline.
 
@@ -272,12 +276,17 @@ def poly_points_quadratic(_command, cursor, segment, absolute, step_dist, step_a
     max_dist = None if step_dist is None else abs(step_dist) * math.sqrt(2)
     max_angle = None if step_angle is None else abs(step_angle) * math.sqrt(2)
 
-    return split_bezier(point_f, tangent_f, cursor, p[2], 0, 1,
-                        max_dist=max_dist, max_angle=max_angle)
+    return split_bezier(
+        point_f, tangent_f, cursor, p[2], 0, 1,
+        min_dist=step_min, max_dist=max_dist, max_angle=max_angle
+    )
 
 
 
-def poly_points_cubic(_command, cursor, segment, absolute, step_dist, step_angle):
+def poly_points_cubic(
+        command, cursor, segment, absolute,
+        step_dist=None, step_angle=None, step_min=None
+):
     """
     Cubic Bézier spline.
 
@@ -322,8 +331,10 @@ def poly_points_cubic(_command, cursor, segment, absolute, step_dist, step_angle
     max_dist = None if step_dist is None else abs(step_dist) * math.sqrt(2)
     max_angle = None if step_angle is None else abs(step_angle) * math.sqrt(2)
 
-    return split_bezier(point_f, tangent_f, cursor, p[3], 0, 1,
-                        max_dist=max_dist, max_angle=max_angle)
+    return split_bezier(
+        point_f, tangent_f, cursor, p[3], 0, 1,
+        min_dist=step_min, max_dist=max_dist, max_angle=max_angle
+    )
 
 
 
@@ -385,7 +396,10 @@ def angle(v):
 
 
 
-def poly_points_arc(_command, cursor, segment, absolute, step_dist, step_angle):
+def poly_points_arc(
+        command, cursor, segment, absolute,
+        step_dist=None, step_angle=None, step_min=None,
+):
     """
     Return absolute points
     """
@@ -453,6 +467,10 @@ def poly_points_arc(_command, cursor, segment, absolute, step_dist, step_angle):
         n = max(n, math.ceil(
             abs(at) * 180 / math.pi / abs(step_angle * gain)))
 
+    if step_min:
+        n = min(n, math.ceil(abs(at) * r / abs(step_min)))
+
+
     p_list = []
     for i in range(1, n + 1):
         a = a1 + at * i / n
@@ -470,7 +488,7 @@ def poly_points_arc(_command, cursor, segment, absolute, step_dist, step_angle):
 
 
 
-def poly_points_linear(command, cursor, segment, absolute, _step_dist, _step_angle):
+def poly_points_linear(command, cursor, segment, absolute, **kwargs):
     """
     Return absolute points
     """
@@ -490,7 +508,7 @@ def poly_points_linear(command, cursor, segment, absolute, _step_dist, _step_ang
 
 
 
-def path_to_poly_list(path, step_dist=None, step_angle=None):
+def path_to_poly_list(path, step_dist=None, step_angle=None, step_min=None):
     path = " " + format_whitespace(path)
     path = re.compile(" ([mlhvzcsqta])([0-9-])", re.I).sub(r"\1 \2", path)
     path = re.sub(",", " ", path)
@@ -542,6 +560,12 @@ def path_to_poly_list(path, step_dist=None, step_angle=None):
     poly_list = [[]]
     cursor = [0, 0]
     command_list = re.compile(" ([mlhvzcsqta])", re.I).split(path)[1:]
+    step_options = {
+        "step_dist": step_dist,
+        "step_angle": step_angle,
+        "step_min": step_min,
+    }
+
     for i in range(0, len(command_list), 2):
         command = command_list[i]
         absolute = command == command.upper()
@@ -575,7 +599,7 @@ def path_to_poly_list(path, step_dist=None, step_angle=None):
                 break
 
             vertex_list = handler["path"](
-                command, cursor, segment, absolute, step_dist, step_angle)
+                command, cursor, segment, absolute, **step_options)
 
             for vertex in vertex_list:
                 cursor = list(vertex)
@@ -727,7 +751,7 @@ scale\(
 def extract_paths(
         node,
         xform=None, with_layers=None,
-        step_dist=None, step_angle=None,
+        step_dist=None, step_angle=None, step_min=None,
         depth=None,
 ):
     if xform is None:
@@ -748,7 +772,8 @@ def extract_paths(
 
     if node.name == "path":
         path = node.attrs["d"]
-        poly_list = path_to_poly_list(path, step_dist=step_dist, step_angle=step_angle)
+        poly_list = path_to_poly_list(
+            path, step_dist=step_dist, step_angle=step_angle, step_min=step_min)
         poly_list = [transform_poly(poly, xform) for poly in poly_list]
         paths += poly_list
 
@@ -767,6 +792,7 @@ def extract_paths(
                     child, xform=np.copy(xform),
                     with_layers=with_layers,
                     step_dist=step_dist, step_angle=step_angle,
+                    step_min=step_min,
                     depth=depth + 1)
         else:
             if label:
@@ -797,7 +823,7 @@ def extract_paths(
 def svg2paths(
         svg_file,
         invert_y=True, with_layers=None,
-        step_dist=None, step_angle=None
+        step_dist=None, step_angle=None, step_min=None
 ):
     LOG.info("Converting %s", svg_file.name)
 
@@ -841,7 +867,7 @@ def svg2paths(
     paths = extract_paths(
         svg,
         xform=xform, with_layers=with_layers,
-        step_dist=step_dist, step_angle=step_angle
+        step_dist=step_dist, step_angle=step_angle, step_min=step_min
     )
 
     return paths

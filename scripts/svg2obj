@@ -63,7 +63,8 @@ Convert paths in an SVG file to polygons in Wavefront OBJ format.""")
         with open(args.svg, "r", encoding="utf-8") as svg:
             svg2obj(
                 out, svg,
-                step_dist=args.distance_step, step_angle=args.angle_step
+                step_dist=args.distance_step, step_angle=args.angle_step,
+                step_min=args.minimum_step
             )
 
 

@@ -11,20 +11,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
-import io
 import sys
-from subprocess import Popen, PIPE
+from pathlib import Path
 
 sys.path.append("../")
 
 from geotk.svg2kicad import svg2kicad
 
-from conftest import get_test_case
+from conftest import get_test_case, api_compare, cli_compare
 
 
 
-TEST_PATH = os.path.abspath(os.path.dirname(__file__))
+TEST_PATH = Path(__file__).parent.resolve()
 
 
 
@@ -32,58 +30,24 @@ def test_api(svg2kicad_case_name):
     (svg_path, kicad_src_path, kicad_known_path) = get_test_case(
         "svg2kicad", svg2kicad_case_name)
 
-    with open(kicad_known_path) as fp:
-        kicad_known_text = fp.read()
+    def f(out):
+        with open(svg_path) as svg_file, \
+             open(kicad_src_path) as kicad_src_file:
+            svg2kicad(out, svg_file, kicad_src_file, step_dist=30, step_angle=15)
 
-    out = io.StringIO()
-    with open(svg_path) as svg_file, \
-         open(kicad_src_path) as kicad_src_file:
-        svg2kicad(out, svg_file, kicad_src_file, step_dist=30, step_angle=15)
-
-    kicad_result_text = out.getvalue()
-
-    assert kicad_result_text == kicad_known_text
+    api_compare(kicad_known_path, f)
 
 
 
 def test_cli(svg2kicad_case_name):
     (svg_path, kicad_src_path, kicad_known_path) = get_test_case(
         "svg2kicad", svg2kicad_case_name)
-    kicad_result_path = \
-        f"/tmp/geotk-test-svg2kicad-{svg2kicad_case_name}.kicad_pcb"
 
-    try:
-        os.remove(kicad_result_path)
-    except FileNotFoundError:
-        pass
-
-    with open(kicad_known_path) as fp:
-        kicad_known_text = fp.read()
-
-    cmd = [
+    cli_compare(kicad_known_path, "svg2kicad", svg2kicad_case_name, [
         "svg2kicad",
         svg_path,
         kicad_src_path,
-        kicad_result_path,
+        "__result_path__",
         "--distance-step", "30",
         "--angle-step", "15",
-    ]
-
-    process = Popen(cmd, stdout=PIPE, stderr=PIPE)
-    (out, err) = process.communicate()
-    status = process.returncode
-    assert not out
-    assert not err
-    assert not status
-
-    cmd = [
-        "diff", "-q",
-        kicad_known_path,
-        kicad_result_path,
-    ]
-    process = Popen(cmd, stdout=PIPE, stderr=PIPE)
-    (out, err) = process.communicate()
-    status = process.returncode
-    assert not out
-    assert not err
-    assert not status
+    ])

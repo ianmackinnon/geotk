@@ -11,29 +11,24 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
-import io
 import sys
-from subprocess import Popen, PIPE
+from pathlib import Path
 
 sys.path.append("../")
 
 from geotk.kicad2svg import kicad2svg
 
-from conftest import get_test_case
+from conftest import get_test_case, api_compare, cli_compare
 
 
 
-TEST_PATH = os.path.abspath(os.path.dirname(__file__))
+TEST_PATH = Path(__file__).parent.resolve()
 
 
 
 def test_api(kicad2svg_case_name):
     (kicad_path, svg_pcb_known_path) = get_test_case(
         "kicad2svg", kicad2svg_case_name)
-
-    with open(svg_pcb_known_path) as fp:
-        svg_pcb_known_text = fp.read()
 
     kwargs = {}
     if "bcu" in kicad2svg_case_name:
@@ -43,33 +38,23 @@ def test_api(kicad2svg_case_name):
 
     kwargs["grid_spacing"] = 0.127
 
-    out = io.StringIO()
-    with open(kicad_path) as fp:
-        kicad2svg(out, fp, **kwargs)
+    def f(out):
+        with open(kicad_path) as fp:
+            kicad2svg(out, fp, **kwargs)
 
-    svg_pcb_result_text = out.getvalue()
+    api_compare(svg_pcb_known_path, f)
 
-    assert svg_pcb_result_text == svg_pcb_known_text
 
 
 
 def test_cli(kicad2svg_case_name):
     (kicad_path, svg_pcb_known_path) = get_test_case(
         "kicad2svg", kicad2svg_case_name)
-    svg_pcb_result_path = f"/tmp/geotk-test-kicad2svg-{kicad2svg_case_name}.svg"
-
-    try:
-        os.remove(svg_pcb_result_path)
-    except FileNotFoundError:
-        pass
-
-    with open(svg_pcb_known_path) as fp:
-        svg_pcb_known_text = fp.read()
 
     cmd = [
         "kicad2svg",
         kicad_path,
-        svg_pcb_result_path,
+        "__result_path__",
         "-g", "0.127",
     ]
 
@@ -78,21 +63,4 @@ def test_cli(kicad2svg_case_name):
     if "n0" in kicad2svg_case_name:
         cmd += ["-n", "0"]
 
-    process = Popen(cmd, stdout=PIPE, stderr=PIPE)
-    (out, err) = process.communicate()
-    status = process.returncode
-    assert not out
-    assert not err
-    assert not status
-
-    cmd = [
-        "diff", "-q",
-        svg_pcb_known_path,
-        svg_pcb_result_path,
-    ]
-    process = Popen(cmd, stdout=PIPE, stderr=PIPE)
-    (out, err) = process.communicate()
-    status = process.returncode
-    assert not out
-    assert not err
-    assert not status
+    cli_compare(svg_pcb_known_path, "kicad2svg", kicad2svg_case_name, cmd)

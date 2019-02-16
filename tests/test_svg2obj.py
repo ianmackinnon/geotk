@@ -11,21 +11,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
-import io
 import sys
 from pathlib import Path
-from subprocess import Popen, PIPE
 
 sys.path.append("../")
 
 from geotk.svg2obj import svg2obj
 
-from conftest import get_test_case
+from conftest import get_test_case, api_compare, cli_compare
 
 
 
-TEST_PATH = os.path.abspath(os.path.dirname(__file__))
+TEST_PATH = Path(__file__).parent.resolve()
 
 
 
@@ -33,16 +30,11 @@ def test_api(svg2obj_case_name):
     (svg_path, obj_known_path) = get_test_case(
         "svg2obj", svg2obj_case_name)
 
-    with open(obj_known_path) as fp:
-        obj_known_text = fp.read()
+    def f(out):
+        with open(svg_path) as fp:
+            svg2obj(out, fp, step_dist=30, step_angle=15)
 
-    out = io.StringIO()
-    with open(svg_path) as fp:
-        svg2obj(out, fp, step_dist=30, step_angle=15)
-
-    obj_result_text = out.getvalue()
-
-    assert obj_result_text == obj_known_text
+    api_compare(obj_known_path, f)
 
 
 
@@ -50,39 +42,10 @@ def test_cli(svg2obj_case_name):
     (svg_path, obj_known_path) = get_test_case(
         "svg2obj", svg2obj_case_name)
 
-    obj_result_path = f"/tmp/geotk-test-svg2obj-{svg2obj_case_name}.obj"
-
-    try:
-        os.remove(obj_result_path)
-    except FileNotFoundError:
-        pass
-
-    with open(obj_known_path) as fp:
-        obj_known_text = fp.read()
-
-    cmd = [
+    cli_compare(obj_known_path, "svg2obj", svg2obj_case_name, [
         "svg2obj",
         svg_path,
-        obj_result_path,
+        "__result_path__",
         "--distance-step", "30",
         "--angle-step", "15",
-    ]
-
-    process = Popen(cmd, stdout=PIPE, stderr=PIPE)
-    (out, err) = process.communicate()
-    status = process.returncode
-    assert not out
-    assert not err
-    assert not status
-
-    cmd = [
-        "diff", "-q",
-        obj_known_path,
-        obj_result_path,
-    ]
-    process = Popen(cmd, stdout=PIPE, stderr=PIPE)
-    (out, err) = process.communicate()
-    status = process.returncode
-    assert not out
-    assert not err
-    assert not status
+    ])

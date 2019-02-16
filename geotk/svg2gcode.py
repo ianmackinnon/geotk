@@ -70,6 +70,12 @@ CONF_SCHEMA = {
         "z-base-coordinate": {
             "type": "number",
         },
+        "x-offset": {
+            "type": "number",
+        },
+        "y-offset": {
+            "type": "number",
+        },
         "z-safety-distance": {
             "type": [
                 "number",
@@ -145,6 +151,8 @@ def write_paths_gcode(out, paths, conf):
     z_start = z_base + conf.get("z-material-thickness", 0) * z_dir
     z_safe = z_start + conf.get("z-safety-distance", 0) * z_dir
 
+    x_offset = conf.get("x-offset", 0)
+    y_offset = conf.get("y-offset", 0)
 
     write_gcode(out, {
         "G90": None
@@ -168,21 +176,19 @@ def write_paths_gcode(out, paths, conf):
             if not path:
                 continue
 
-            write_gcode(out, {
-                "G0": None,
-                "X": path[0][0],
-                "Y": path[0][1],
-            })
-            write_gcode(out, {
-                "G1": None,
-                "Z": z_target,
-            })
 
-            for vertex in path[1:]:
+            for v, vertex in enumerate(path):
+                if v == 1:
+                    write_gcode(out, {
+                        "G1": None,
+                        "Z": z_target,
+                    })
+
+                cmd = "G1" if v else "G0"
                 write_gcode(out, {
-                    "G1": None,
-                    "X": vertex[0],
-                    "Y": vertex[1],
+                    cmd: None,
+                    "X": vertex[0] + x_offset,
+                    "Y": vertex[1] + y_offset,
                 })
 
             write_gcode(out, {
@@ -197,7 +203,7 @@ def write_paths_gcode(out, paths, conf):
 
 def svg2gcode(
         out, svg_file, conf,
-        step_dist=None, step_angle=None
+        step_dist=None, step_angle=None, step_min=None
 ):
     """
     Write paths in GCODE format.
@@ -214,8 +220,11 @@ def svg2gcode(
         step_angle = conf.get("linearization-target-angle",
                               DEFAULTS["linearization-target-angle"])
 
+    if step_min is None:
+        step_min = conf.get("linearization-min-dist", None)
+
     paths = svg2paths(
         svg_file,
-        step_dist=step_dist, step_angle=step_angle
+        step_dist=step_dist, step_angle=step_angle, step_min=step_min,
     )
     write_paths_gcode(out, paths, conf)

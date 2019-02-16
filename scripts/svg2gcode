@@ -73,7 +73,8 @@ def main():
             svg2gcode(
                 out, svg,
                 conf=conf,
-                step_dist=args.distance_step, step_angle=args.angle_step
+                step_dist=args.distance_step, step_angle=args.angle_step,
+                step_min=args.minimum_step
             )
 
     if args.gcode:

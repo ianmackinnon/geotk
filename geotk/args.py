@@ -44,6 +44,11 @@ def svg_input_parser():
     parser = argparse.ArgumentParser(add_help=False)
 
     parser.add_argument(
+        "--minimum-step", "-M",
+        action="store",
+        type=float,
+        help="Minimum segment dist for linearization of curved paths.")
+    parser.add_argument(
         "--angle-step", "-A",
         action="store",
         type=float,
