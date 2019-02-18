@@ -1,0 +1,7 @@
+{
+  "unit": "mm",
+  "feedrate": 1000,
+  "z-safety-direction": 1,
+  "z-safety-distance": 30,
+  "z-base-coordinate": -54
+}
