@@ -226,7 +226,9 @@ def test_poly_points(case_name):
     case = PATH_CASES[case_name]
 
     result = path_to_poly_list(
-        case["d"],
+        {
+            "d": case["d"],
+        },
         step_dist=case.get("step_dist", None),
         step_angle=case.get("step_angle", None),
     )[0]

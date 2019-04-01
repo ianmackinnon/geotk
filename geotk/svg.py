@@ -508,7 +508,8 @@ def poly_points_linear(command, cursor, segment, absolute, **kwargs):
 
 
 
-def path_to_poly_list(path, step_dist=None, step_angle=None, step_min=None):
+def path_to_poly_list(attrs, step_dist=None, step_angle=None, step_min=None):
+    path = attrs["d"]
     path = " " + format_whitespace(path)
     path = re.compile(" ([mlhvzcsqta])([0-9-])", re.I).sub(r"\1 \2", path)
     path = re.sub(",", " ", path)
@@ -613,6 +614,27 @@ def path_to_poly_list(path, step_dist=None, step_angle=None, step_min=None):
     poly_list = [[(v[0], v[1]) for v in poly] for poly in poly_list]
 
     return poly_list
+
+
+
+def circle_to_poly_list(attrs, step_dist=None, step_angle=None, step_min=None):
+    r = float(attrs["r"])
+    x = float(attrs["cx"])
+    y = float(attrs["cy"])
+
+    path = [[x + r, y]]
+    segments = [
+        [r, r, 0, 0, 0, x, y - r],
+        [r, r, 0, 0, 0, x - r, y],
+        [r, r, 0, 0, 0, x, y + r],
+        [r, r, 0, 0, 0, x + r, y],
+    ]
+    for segment in segments:
+        path += poly_points_arc(
+            "A", path[-1], segment, absolute=True,
+            step_dist=step_dist, step_angle=step_angle, step_min=step_min
+        )
+    return [path]
 
 
 
@@ -764,16 +786,20 @@ def extract_paths(
 
     paths = []
 
+    path_handlers = {
+        "path": path_to_poly_list,
+        "circle": circle_to_poly_list,
+    }
+
     if hasattr(node, "attrs") and "transform" in node.attrs:
         LOG.debug("transform raw: %s %s", node.name, node["transform"])
         xform_ = parse_transform(node["transform"])
         if xform_ is not None:
             xform = xform @ xform_
 
-    if node.name == "path":
-        path = node.attrs["d"]
-        poly_list = path_to_poly_list(
-            path, step_dist=step_dist, step_angle=step_angle, step_min=step_min)
+    if node.name in path_handlers:
+        poly_list = path_handlers[node.name](
+            node.attrs, step_dist=step_dist, step_angle=step_angle, step_min=step_min)
         poly_list = [transform_poly(poly, xform) for poly in poly_list]
         paths += poly_list
 

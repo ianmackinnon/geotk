@@ -25,7 +25,7 @@ SVG paths are converted to OBJ polygon faces parallel to the Z-plane at the spec
 
 ## Caveats:
 
--   Geometric shapes like circles and rectangles are not converted to paths.
+-   Only `circle` primtives are supported, not `rect`, `ellipse`, etc.
 -   Only supports path commands `MmLlHhVvCcQqAaZz`.
 -   Arcs with different X and Y radii are simplied as straight lines.
 
@@ -55,7 +55,7 @@ A JSON configuration file in the following format is also required:
 
 ## Caveats:
 
--   Geometric shapes like circles and rectangles are not converted to paths.
+-   Only `circle` primtives are supported, not `rect`, `ellipse`, etc.
 -   Only supports path commands `MmLlHhVvCcQqAaZz`.
 -   Arcs with different X and Y radii are simplied as straight lines.
 
@@ -87,7 +87,7 @@ Paths must be stored exactly two layers deep. The first layer should have a name
 
 ## Caveats:
 
--   Geometric shapes like circles and rectangles are not converted to paths.
+-   Only `circle` primtives are supported, not `rect`, `ellipse`, etc.
 -   Only supports path commands `MmLlHhVvCcQqAaZz`.
 -   Arcs with different X and Y radii are simplied as straight lines.
 

@@ -167,7 +167,7 @@ def api_compare(known_path, f):
 
 
 def cli_compare(known_path, name, case, cmd):
-    result_path = f"/tmp/geotk-test-{name}-{case}.obj"
+    result_path = f"/tmp/geotk-test-{name}-{case}{known_path.suffix}"
 
     try:
         os.remove(result_path)
