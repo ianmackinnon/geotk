@@ -78,6 +78,9 @@ def format_float(value):
     if not value:
         return "0"
 
+    if isinstance(value, str):
+        return value
+
     if int(value) == value:
         return f"{int(value):d}"
 
