@@ -638,6 +638,18 @@ def circle_to_poly_list(attrs, step_dist=None, step_angle=None, step_min=None):
 
 
 
+def polygon_to_poly_list(attrs, step_dist=None, step_angle=None, step_min=None):
+    points = attrs["points"]
+    point_list = [tuple([float(v2) for v2 in v.split(",")])
+                  for v in re.compile("\s").split(points) if v]
+
+    point_list.append(point_list[0])
+
+    poly_list = [point_list]
+    return poly_list
+
+
+
 def parse_transform(text):
     text = format_whitespace(text)
 
@@ -788,6 +800,7 @@ def extract_paths(
 
     path_handlers = {
         "path": path_to_poly_list,
+        "polygon": polygon_to_poly_list,
         "circle": circle_to_poly_list,
     }
 

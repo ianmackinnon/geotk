@@ -12,7 +12,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-
+import pprint
 import jsonschema
 
 from geotk.common import format_float
@@ -41,24 +41,21 @@ CONF_SCHEMA = {
         },
         "feedrate": {
             "type": "number",
-            "minimum": 0,
-            "exclusiveMinimum": True,
+            "exclusiveMinimum": 0,
         },
         "linearization-target-angle": {
             "type": [
                 "number",
                 "null",
             ],
-            "minimum": 0,
-            "exclusiveMinimum": True,
+            "exclusiveMinimum": 0,
         },
         "linearization-target-distance": {
             "type": [
                 "number",
                 "null",
             ],
-            "minimum": 0,
-            "exclusiveMinimum": True,
+            "exclusiveMinimum": 0,
         },
         "z-safety-direction": {
             "type": "integer",
@@ -88,8 +85,7 @@ CONF_SCHEMA = {
                 "number",
                 "null",
             ],
-            "minimum": 0,
-            "exclusiveMinimum": True,
+            "exclusiveMinimum": 0,
         },
         "z-material-thickness": {
             "type": [

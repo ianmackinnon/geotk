@@ -41,6 +41,9 @@ TEST_CASE_PATTERNS = {
         "required": ("kicad_pcb", "svg"),
         "remove": ("pro", ),
     },
+    "svg2scad": {
+        "required": ("svg", "scad"),
+    },
 }
 
 
