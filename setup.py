@@ -38,10 +38,13 @@ setuptools.setup(
     ],
     install_requires=["beautifulsoup4", "jsonschema", "lxml", "numpy"],
     python_requires='>=3',
-    scripts=["scripts/obj2svg", "scripts/svg2obj",
-             "scripts/svg2gcode",
-             "scripts/svg2scad",
-             "scripts/kicad2svg", "scripts/svg2kicad", ],
+    scripts=[
+        "scripts/obj2svg", "scripts/svg2obj",
+        "scripts/svg2gcode",
+        "scripts/svg2scad",
+        "scripts/kicad2svg", "scripts/svg2kicad",
+        "scripts/dxf2kicad",
+    ],
     setup_requires=["pytest-runner"],
     tests_require=["pytest", "tox", "coverage", "pytest-cov"],
 )

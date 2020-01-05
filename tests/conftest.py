@@ -44,6 +44,9 @@ TEST_CASE_PATTERNS = {
     "svg2scad": {
         "required": ("svg", "scad"),
     },
+    "dxf2kicad": {
+        "required": ("dxf", "kicad_pcb"),
+    },
 }
 
 

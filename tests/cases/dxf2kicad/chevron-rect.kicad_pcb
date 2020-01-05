@@ -1,0 +1,7 @@
+  (gr_line (start 27.3502 11.025) (end 47.6 11.025) (layer Edge.Cuts) (width 0.2))
+  (gr_line (start 47.6 11.025) (end 47.6 -11.025) (layer Edge.Cuts) (width 0.2))
+  (gr_line (start 47.6 -11.025) (end -47.6 -11.025) (layer Edge.Cuts) (width 0.2))
+  (gr_line (start -47.6 -11.025) (end -47.6 11.025) (layer Edge.Cuts) (width 0.2))
+  (gr_line (start -47.6 11.025) (end -27.3502 11.025) (layer Edge.Cuts) (width 0.2))
+  (gr_line (start -27.3502 11.025) (end 0.0 18.8436) (layer Edge.Cuts) (width 0.2))
+  (gr_line (start 0.0 18.8436) (end 27.3502 11.025) (layer Edge.Cuts) (width 0.2))
