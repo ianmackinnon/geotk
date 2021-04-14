@@ -32,6 +32,16 @@ LOG = logging.getLogger("test_unit_svg")
 
 
 PATH_CASES = {
+    "minus-token": {
+        "d": "M-0,10 L-10-0 10-0z",
+        "result": (
+            (-0, 10),
+            (-10, -0),
+            (10, -0),
+            (-0, 10),
+        ),
+    },
+
     "arc-direct": {
         "d": "M 0,10 A 10,10 0 0 0 10,0",
         "result": (

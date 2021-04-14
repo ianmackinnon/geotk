@@ -416,7 +416,7 @@ def poly_points_arc(
     sweep = bool(sweep)
 
     if rx != ry:
-        LOG.warning("Simplifying arc with different radii.")
+        LOG.warning("Simplifying arc with different radii: %s, %s.", rx, ry)
         return [end]
 
     if cursor == end:
@@ -427,7 +427,8 @@ def poly_points_arc(
 
     if r * 2 < ce_dist:
         raise ValueError(
-            "Arc diameter is greater than distance between points.")
+            "Arc diameter %s is greater than distance between points %f.",
+            r * 2, ce_dist)
 
     c2e = sub(end, cursor)
     mid = add(cursor, mult(c2e, .5))
@@ -511,7 +512,11 @@ def poly_points_linear(command, cursor, segment, absolute, **kwargs):
 def path_to_poly_list(attrs, step_dist=None, step_angle=None, step_min=None):
     path = attrs["d"]
     path = " " + format_whitespace(path)
-    path = re.compile(" ([mlhvzcsqta])([0-9-])", re.I).sub(r"\1 \2", path)
+
+    # `-` after a digit implies a new token:
+    path = re.compile("([0-9])(-)", re.I).sub(r"\1 \2", path)
+
+    path = re.compile("([mlhvzcsqta])([0-9-])", re.I).sub(r" \1 \2", path)
     path = re.sub(",", " ", path)
 
     handlers = {
@@ -560,7 +565,7 @@ def path_to_poly_list(attrs, step_dist=None, step_angle=None, step_min=None):
 
     poly_list = [[]]
     cursor = [0, 0]
-    command_list = re.compile(" ([mlhvzcsqta])", re.I).split(path)[1:]
+    command_list = re.compile("([mlhvzcsqta])", re.I).split(path)[1:]
     step_options = {
         "step_dist": step_dist,
         "step_angle": step_angle,

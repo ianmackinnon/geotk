@@ -160,7 +160,7 @@ def obj2svg(out, obj_file, unit=""):
             vert_list.append(point)
             continue
 
-        f_match = re.match("f( [-0-9e./]+)+$", line)
+        f_match = re.match("[fl]( [-0-9e./]+)+$", line)
         if f_match:
             face = [int(v.split("/")[0]) for v in line.split()[1:]]
             LOG.debug("Face %d: %s", len(face_list), repr(face))
