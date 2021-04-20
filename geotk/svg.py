@@ -232,6 +232,7 @@ def split_bezier(
 
 def poly_points_quadratic(
         command, cursor, segment, absolute,
+        last_point,
         step_dist=None, step_angle=None, step_min=None
 ):
     """
@@ -241,6 +242,14 @@ def poly_points_quadratic(
     """
 
     vertex_list = [tuple(cursor)]
+
+    if command.upper() == "T":
+        # Add reflected previous control point
+        vertex_list.append((
+            cursor[0] * 2 - last_point[0][0],
+            cursor[1] * 2 - last_point[0][1],
+        ))
+
     while segment:
         vertex = tuple(segment[:2])
         segment = segment[2:]
@@ -252,6 +261,8 @@ def poly_points_quadratic(
                 cursor[0] + vertex[0],
                 cursor[1] + vertex[1]
             ))
+
+    last_point[:] = vertex_list[-2:-1]
 
     p = vertex_list
 
@@ -285,6 +296,7 @@ def poly_points_quadratic(
 
 def poly_points_cubic(
         command, cursor, segment, absolute,
+        last_point,
         step_dist=None, step_angle=None, step_min=None
 ):
     """
@@ -294,6 +306,14 @@ def poly_points_cubic(
     """
 
     vertex_list = [tuple(cursor)]
+
+    if command.upper() == "S":
+        # Add reflected previous control point
+        vertex_list.append((
+            cursor[0] * 2 - last_point[0][0],
+            cursor[1] * 2 - last_point[0][1],
+        ))
+
     while segment:
         vertex = tuple(segment[:2])
         segment = segment[2:]
@@ -305,6 +325,8 @@ def poly_points_cubic(
                 cursor[0] + vertex[0],
                 cursor[1] + vertex[1]
             ))
+
+    last_point[:] = vertex_list[-2:-1]
 
     p = vertex_list
 
@@ -398,6 +420,7 @@ def angle(v):
 
 def poly_points_arc(
         command, cursor, segment, absolute,
+        last_point,
         step_dist=None, step_angle=None, step_min=None,
 ):
     """
@@ -489,7 +512,11 @@ def poly_points_arc(
 
 
 
-def poly_points_linear(command, cursor, segment, absolute, **kwargs):
+def poly_points_linear(
+        command, cursor, segment, absolute,
+        last_point,
+        **kwargs
+):
     """
     Return absolute points
     """
@@ -544,18 +571,18 @@ def path_to_poly_list(attrs, step_dist=None, step_angle=None, step_min=None):
             "length": 6,
             "path": poly_points_cubic,
         },
-        # "S": {
-        #     "length": 4,
-        #     "path": poly_points_cubic,
-        # },
+        "S": {
+            "length": 4,
+            "path": poly_points_cubic,
+        },
         "Q": {
             "length": 4,
             "path": poly_points_quadratic,
         },
-        # "T": {
-        #     "length": 2,
-        #     "path": poly_points_quadratic,
-        # },
+        "T": {
+            "length": 2,
+            "path": poly_points_quadratic,
+        },
         "A": {
             "length": 7,
             "path": poly_points_arc,
@@ -572,6 +599,7 @@ def path_to_poly_list(attrs, step_dist=None, step_angle=None, step_min=None):
         "step_min": step_min,
     }
 
+    last_point = []
     for i in range(0, len(command_list), 2):
         command = command_list[i]
         absolute = command == command.upper()
@@ -605,7 +633,15 @@ def path_to_poly_list(attrs, step_dist=None, step_angle=None, step_min=None):
                 break
 
             vertex_list = handler["path"](
-                command, cursor, segment, absolute, **step_options)
+                command, cursor,
+                segment, absolute,
+                last_point,
+                **step_options
+            )
+
+            if command.upper() not in "CSTQ":
+                del last_point[:]
+
 
             for vertex in vertex_list:
                 cursor = list(vertex)
@@ -636,7 +672,7 @@ def circle_to_poly_list(attrs, step_dist=None, step_angle=None, step_min=None):
     ]
     for segment in segments:
         path += poly_points_arc(
-            "A", path[-1], segment, absolute=True,
+            "A", path[-1], segment, absolute=True, last_point=None,
             step_dist=step_dist, step_angle=step_angle, step_min=step_min
         )
     return [path]
